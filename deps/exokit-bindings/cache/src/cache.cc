@@ -21,6 +21,7 @@ NAN_METHOD(Get) {
       valuePtr = nullptr;
     }
   }
+
   if (valuePtr) {
     Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(Isolate::GetCurrent(), valuePtr->data(), valuePtr->size());
     Local<Uint8Array> uint8Array = Uint8Array::New(arrayBuffer, 0, arrayBuffer->ByteLength());
@@ -71,16 +72,17 @@ Local<Object> Initialize(Isolate *isolate) {
   Nan::EscapableHandleScope scope;
 
   Local<Object> result = Nan::New<Object>();
+  Local<Context> context = Nan::GetCurrentContext();
 
   Local<FunctionTemplate> getFnTemplate = Nan::New<FunctionTemplate>(Get);
   Local<Function> getFn = Nan::GetFunction(getFnTemplate).ToLocalChecked();
-  result->Set(JS_STR("get"), getFn);
+  result->Set(context, JS_STR("get"), getFn);
   Local<FunctionTemplate> setFnTemplate = Nan::New<FunctionTemplate>(Set);
   Local<Function> setFn = Nan::GetFunction(setFnTemplate).ToLocalChecked();
-  result->Set(JS_STR("set"), setFn);
+  result->Set(context, JS_STR("set"), setFn);
   Local<FunctionTemplate> deleteFnTemplate = Nan::New<FunctionTemplate>(Delete);
   Local<Function> deleteFn = Nan::GetFunction(deleteFnTemplate).ToLocalChecked();
-  result->Set(JS_STR("delete"), deleteFn);
+  result->Set(context, JS_STR("delete"), deleteFn);
 
   return scope.Escape(result);
 }

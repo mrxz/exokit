@@ -32,15 +32,16 @@ NAN_METHOD(ctxCallWrap) {
 }
 
 bool isImageValue(Local<Value> arg) {
-  if (JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLCanvasElement"))) {
-    Local<Value> otherContextObj = JS_OBJ(arg)->Get(JS_STR("_context"));
-    return otherContextObj->IsObject() && JS_OBJ(JS_OBJ(otherContextObj)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("CanvasRenderingContext2D"));
+  Local<Context> context = Nan::GetCurrentContext();
+  if (JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLCanvasElement"))) {
+    Local<Value> otherContextObj = JS_OBJ(arg)->Get(context, JS_STR("_context")).ToLocalChecked();
+    return otherContextObj->IsObject() && JS_OBJ(JS_OBJ(otherContextObj)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("CanvasRenderingContext2D"));
   } else {
     return arg->IsObject() && (
-      JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("CanvasRenderingContext2D")) ||
-      JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLImageElement")) ||
-      JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("ImageData")) ||
-      JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("ImageBitmap"))
+      JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("CanvasRenderingContext2D")) ||
+      JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLImageElement")) ||
+      JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("ImageData")) ||
+      JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("ImageBitmap"))
     );
   }
 }
@@ -147,9 +148,10 @@ Local<Object> CanvasRenderingContext2D::Initialize(Isolate *isolate, Local<Value
   Nan::SetMethod(proto, "setGrContext", SetGrContext);
 
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
-  ctorFn->Set(JS_STR("ImageData"), imageDataCons);
-  ctorFn->Set(JS_STR("CanvasGradient"), canvasGradientCons);
-  ctorFn->Set(JS_STR("CanvasPattern"), canvasPatternCons);
+  Local<Context> context = Nan::GetCurrentContext();
+  ctorFn->Set(context, JS_STR("ImageData"), imageDataCons);
+  ctorFn->Set(context, JS_STR("CanvasGradient"), canvasGradientCons);
+  ctorFn->Set(context, JS_STR("CanvasPattern"), canvasPatternCons);
 
   return scope.Escape(ctorFn);
 }
@@ -438,7 +440,7 @@ NAN_GETTER(CanvasRenderingContext2D::TextureGetter) {
 
   if (context->tex != 0) {
     Local<Object> texObj = Nan::New<Object>();
-    texObj->Set(JS_STR("id"), JS_INT(context->tex));
+    texObj->Set(Nan::GetCurrentContext(), JS_STR("id"), JS_INT(context->tex));
     info.GetReturnValue().Set(texObj);
   } else {
     info.GetReturnValue().Set(Nan::Null());
@@ -473,6 +475,7 @@ NAN_GETTER(CanvasRenderingContext2D::StrokeStyleGetter) {
 
 NAN_SETTER(CanvasRenderingContext2D::StrokeStyleSetter) {
   // Nan::HandleScope scope;
+  Local<Context> v8Context = Nan::GetCurrentContext();
 
   if (value->IsString()) {
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
@@ -482,12 +485,12 @@ NAN_SETTER(CanvasRenderingContext2D::StrokeStyleSetter) {
     uint32_t rgba = ((uint32_t)webColor.a << (8 * 3)) | ((uint32_t)webColor.r << (8 * 2)) | ((uint32_t)webColor.g << (8 * 1)) | ((uint32_t)webColor.b << (8 * 0));
     context->strokePaint.setColor(rgba);
     context->strokePaint.setShader(nullptr);
-  } else if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("CanvasGradient"))) {
+  } else if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("CanvasGradient"))) {
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
 
     CanvasGradient *canvasGradient = ObjectWrap::Unwrap<CanvasGradient>(Local<Object>::Cast(value));
     context->strokePaint.setShader(canvasGradient->getShader());
-  } else if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("CanvasPattern"))) {
+  } else if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("CanvasPattern"))) {
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
 
     CanvasPattern *canvasPattern = ObjectWrap::Unwrap<CanvasPattern>(Local<Object>::Cast(value));
@@ -588,6 +591,7 @@ NAN_GETTER(CanvasRenderingContext2D::FillStyleGetter) {
 
 NAN_SETTER(CanvasRenderingContext2D::FillStyleSetter) {
   // Nan::HandleScope scope;
+  Local<Context> v8Context = Nan::GetCurrentContext();
 
   if (value->IsString()) {
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
@@ -597,12 +601,12 @@ NAN_SETTER(CanvasRenderingContext2D::FillStyleSetter) {
     uint32_t rgba = ((uint32_t)webColor.a << (8 * 3)) | ((uint32_t)webColor.r << (8 * 2)) | ((uint32_t)webColor.g << (8 * 1)) | ((uint32_t)webColor.b << (8 * 0));
     context->fillPaint.setColor(rgba);
     context->fillPaint.setShader(nullptr);
-  } else if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("CanvasGradient"))) {
+  } else if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("CanvasGradient"))) {
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
 
     CanvasGradient *canvasGradient = ObjectWrap::Unwrap<CanvasGradient>(Local<Object>::Cast(value));
     context->fillPaint.setShader(canvasGradient->getShader());
-  } else if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("CanvasPattern"))) {
+  } else if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("CanvasPattern"))) {
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
 
     CanvasPattern *canvasPattern = ObjectWrap::Unwrap<CanvasPattern>(Local<Object>::Cast(value));
@@ -637,12 +641,13 @@ NAN_SETTER(CanvasRenderingContext2D::FontSetter) {
 
     canvas::FontDeclaration declaration = canvas::parse_short_font(font);
 
-    contextObj->Set(JS_STR("fontFamily"), JS_STR(declaration.fontFamily));
-    contextObj->Set(JS_STR("fontStyle"), JS_STR(declaration.fontStyle));
-    contextObj->Set(JS_STR("fontVariant"), JS_STR(declaration.fontVariant));
-    contextObj->Set(JS_STR("fontWeight"), JS_STR(declaration.fontWeight));
-    contextObj->Set(JS_STR("fontSize"), JS_STR(declaration.fontSize));
-    contextObj->Set(JS_STR("lineHeight"), JS_STR(declaration.lineHeight));
+    Local<Context> context = Nan::GetCurrentContext();
+    contextObj->Set(context, JS_STR("fontFamily"), JS_STR(declaration.fontFamily));
+    contextObj->Set(context, JS_STR("fontStyle"), JS_STR(declaration.fontStyle));
+    contextObj->Set(context, JS_STR("fontVariant"), JS_STR(declaration.fontVariant));
+    contextObj->Set(context, JS_STR("fontWeight"), JS_STR(declaration.fontWeight));
+    contextObj->Set(context, JS_STR("fontSize"), JS_STR(declaration.fontSize));
+    contextObj->Set(context, JS_STR("lineHeight"), JS_STR(declaration.lineHeight));
   } else {
     Nan::ThrowError("font: invalid arguments");
   }
@@ -1084,7 +1089,7 @@ NAN_METHOD(CanvasRenderingContext2D::MeasureText) {
   std::string text(*textUtf8, textUtf8.length());
 
   Local<Object> result = Object::New(Isolate::GetCurrent());
-  result->Set(JS_STR("width"), JS_FLOAT(context->MeasureText(text)));
+  result->Set(Nan::GetCurrentContext(), JS_STR("width"), JS_FLOAT(context->MeasureText(text)));
 
   info.GetReturnValue().Set(result);
 }
@@ -1113,10 +1118,11 @@ NAN_METHOD(CanvasRenderingContext2D::Clip) {
 
 NAN_METHOD(CanvasRenderingContext2D::Stroke) {
   // Nan::HandleScope scope;
+  Local<Context> v8Context = Nan::GetCurrentContext();
 
   CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
 
-  if (TO_BOOL(info[0]) && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("Path2D"))) {
+  if (TO_BOOL(info[0]) && JS_OBJ(JS_OBJ(info[0])->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("Path2D"))) {
     Path2D *path2d = ObjectWrap::Unwrap<Path2D>(Local<Object>::Cast(info[0]));
     context->Stroke(*path2d);
   } else {
@@ -1126,10 +1132,11 @@ NAN_METHOD(CanvasRenderingContext2D::Stroke) {
 
 NAN_METHOD(CanvasRenderingContext2D::Fill) {
   // Nan::HandleScope scope;
+  Local<Context> v8Context = Nan::GetCurrentContext();
 
   CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
 
-  if (TO_BOOL(info[0]) && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("Path2D"))) {
+  if (TO_BOOL(info[0]) && JS_OBJ(JS_OBJ(info[0])->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("Path2D"))) {
     Path2D *path2d = ObjectWrap::Unwrap<Path2D>(Local<Object>::Cast(info[0]));
     context->Fill(*path2d);
   } else {
@@ -1299,7 +1306,8 @@ NAN_METHOD(CanvasRenderingContext2D::CreateLinearGradient) {
     Local<Object> contextObj = Local<Object>::Cast(info.This());
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(contextObj);
 
-    Local<Function> canvasGradientCons = Local<Function>::Cast(JS_OBJ(contextObj->Get(JS_STR("constructor")))->Get(JS_STR("CanvasGradient")));
+    Local<Context> v8Context = Nan::GetCurrentContext();
+    Local<Function> canvasGradientCons = Local<Function>::Cast(JS_OBJ(contextObj->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("CanvasGradient")).ToLocalChecked());
     Local<Value> argv[] = {
       info[0],
       info[1],
@@ -1318,7 +1326,8 @@ NAN_METHOD(CanvasRenderingContext2D::CreateRadialGradient) {
     Local<Object> contextObj = Local<Object>::Cast(info.This());
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(contextObj);
 
-    Local<Function> canvasGradientCons = Local<Function>::Cast(JS_OBJ(contextObj->Get(JS_STR("constructor")))->Get(JS_STR("CanvasGradient")));
+    Local<Context> v8Context = Nan::GetCurrentContext();
+    Local<Function> canvasGradientCons = Local<Function>::Cast(JS_OBJ(contextObj->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("CanvasGradient")).ToLocalChecked());
     Local<Value> argv[] = {
       info[0],
       info[1],
@@ -1339,7 +1348,8 @@ NAN_METHOD(CanvasRenderingContext2D::CreatePattern) {
     Local<Object> contextObj = Local<Object>::Cast(info.This());
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(contextObj);
 
-    Local<Function> canvasPatternCons = Local<Function>::Cast(JS_OBJ(contextObj->Get(JS_STR("constructor")))->Get(JS_STR("CanvasPattern")));
+    Local<Context> v8Context = Nan::GetCurrentContext();
+    Local<Function> canvasPatternCons = Local<Function>::Cast(JS_OBJ(contextObj->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("CanvasPattern")).ToLocalChecked());
     Local<Value> argv[] = {
       info[0],
       info[1],
@@ -1355,11 +1365,12 @@ NAN_METHOD(CanvasRenderingContext2D::SetLineDash) {
   if (info[0]->IsArray()) {
     CanvasRenderingContext2D *context = ObjectWrap::Unwrap<CanvasRenderingContext2D>(info.This());
     Local<Array> arg = Local<Array>::Cast(info[0]);
+    Local<Context> v8Context = Nan::GetCurrentContext();
 
     int length = arg->Length();
     std::vector<float> intervals(length);
     for (int i = 0; i < length; i++) {
-      intervals[i] = TO_FLOAT(arg->Get(i));
+      intervals[i] = TO_FLOAT(arg->Get(v8Context, i).ToLocalChecked());
     }
     context->strokePaint.setPathEffect(SkDashPathEffect::Make(intervals.data(), intervals.size(), 0));
   } else {
@@ -1427,14 +1438,15 @@ NAN_METHOD(CanvasRenderingContext2D::CreateImageData) {
   double w = TO_DOUBLE(info[0]);
   double h = TO_DOUBLE(info[1]);
 
+  Local<Context> v8Context = Nan::GetCurrentContext();
   Local<Function> imageDataCons = Local<Function>::Cast(
-    JS_OBJ(Local<Object>::Cast(info.This())->Get(JS_STR("constructor")))->Get(JS_STR("ImageData"))
+    JS_OBJ(Local<Object>::Cast(info.This())->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("ImageData")).ToLocalChecked()
   );
   Local<Value> argv[] = {
     Number::New(Isolate::GetCurrent(), w),
     Number::New(Isolate::GetCurrent(), h),
   };
-  Local<Object> imageDataObj = imageDataCons->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv)/sizeof(argv[0]), argv).ToLocalChecked();
+  Local<Object> imageDataObj = imageDataCons->NewInstance(v8Context, sizeof(argv)/sizeof(argv[0]), argv).ToLocalChecked();
 
   info.GetReturnValue().Set(imageDataObj);
 }
@@ -1448,14 +1460,15 @@ NAN_METHOD(CanvasRenderingContext2D::GetImageData) {
   unsigned int w = TO_UINT32(info[2]);
   unsigned int h = TO_UINT32(info[3]);
 
+  Local<Context> v8Context = Nan::GetCurrentContext();
   Local<Function> imageDataCons = Local<Function>::Cast(
-    JS_OBJ(Local<Object>::Cast(info.This())->Get(JS_STR("constructor")))->Get(JS_STR("ImageData"))
+    JS_OBJ(Local<Object>::Cast(info.This())->Get(v8Context, JS_STR("constructor")).ToLocalChecked())->Get(v8Context, JS_STR("ImageData")).ToLocalChecked()
   );
   Local<Value> argv[] = {
     Number::New(Isolate::GetCurrent(), w),
     Number::New(Isolate::GetCurrent(), h),
   };
-  Local<Object> imageDataObj = imageDataCons->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv)/sizeof(argv[0]), argv).ToLocalChecked();
+  Local<Object> imageDataObj = imageDataCons->NewInstance(v8Context, sizeof(argv)/sizeof(argv[0]), argv).ToLocalChecked();
   ImageData *imageData = ObjectWrap::Unwrap<ImageData>(imageDataObj);
 
   bool ok = context->surface->getCanvas()->readPixels(imageData->bitmap, x, y);
@@ -1538,7 +1551,7 @@ NAN_METHOD(CanvasRenderingContext2D::ToArrayBuffer) {
 
   Local<ArrayBuffer> result = ArrayBuffer::New(Isolate::GetCurrent(), data->size());
   memcpy(result->GetContents().Data(), data->data(), data->size());
-  result->Set(JS_STR("type"), JS_STR(type));
+  result->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR(type));
   info.GetReturnValue().Set(result);
 }
 
@@ -1629,7 +1642,8 @@ NAN_METHOD(CanvasRenderingContext2D::SetTexture) {
 }
 
 bool CanvasRenderingContext2D::isImageType(Local<Value> arg) {
-  Local<Value> constructorName = JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"));
+  Local<Context> context = Nan::GetCurrentContext();
+  Local<Value> constructorName = JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked();
 
   Nan::Utf8String utf8Value(constructorName);
   std::string stringValue(*utf8Value, utf8Value.length());
@@ -1655,29 +1669,30 @@ sk_sp<SkImage> CanvasRenderingContext2D::getImageFromContext(CanvasRenderingCont
 }
 
 sk_sp<SkImage> CanvasRenderingContext2D::getImage(Local<Value> arg) {
-  if (JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLImageElement"))) {
-    Image *image = ObjectWrap::Unwrap<Image>(Local<Object>::Cast(JS_OBJ(arg)->Get(JS_STR("image"))));
+  Local<Context> context = Nan::GetCurrentContext();
+  if (JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLImageElement"))) {
+    Image *image = ObjectWrap::Unwrap<Image>(Local<Object>::Cast(JS_OBJ(arg)->Get(context, JS_STR("image")).ToLocalChecked()));
     return image->image;
-  } else if (JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLVideoElement"))) {
-    auto video = JS_OBJ(arg)->Get(JS_STR("video"));
+  } else if (JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLVideoElement"))) {
+    auto video = JS_OBJ(arg)->Get(context, JS_STR("video")).ToLocalChecked();
     if (video->IsObject()) {
-      return getImage(JS_OBJ(video)->Get(JS_STR("imageData")));
+      return getImage(JS_OBJ(video)->Get(context, JS_STR("imageData")).ToLocalChecked());
     }
     return nullptr;
-  } else if (JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("ImageData"))) {
+  } else if (JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("ImageData"))) {
     ImageData *imageData = ObjectWrap::Unwrap<ImageData>(Local<Object>::Cast(arg));
     return SkImage::MakeFromBitmap(imageData->bitmap);
-  } else if (JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("ImageBitmap"))) {
+  } else if (JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("ImageBitmap"))) {
     ImageBitmap *imageBitmap = ObjectWrap::Unwrap<ImageBitmap>(Local<Object>::Cast(arg));
     return SkImage::MakeFromBitmap(imageBitmap->bitmap);
-  } else if (JS_OBJ(JS_OBJ(arg)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLCanvasElement"))) {
-    Local<Value> otherContextObj = JS_OBJ(arg)->Get(JS_STR("_context"));
-    if (otherContextObj->IsObject() && JS_OBJ(JS_OBJ(otherContextObj)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("CanvasRenderingContext2D"))) {
+  } else if (JS_OBJ(JS_OBJ(arg)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLCanvasElement"))) {
+    Local<Value> otherContextObj = JS_OBJ(arg)->Get(context, JS_STR("_context")).ToLocalChecked();
+    if (otherContextObj->IsObject() && JS_OBJ(JS_OBJ(otherContextObj)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("CanvasRenderingContext2D"))) {
       CanvasRenderingContext2D *otherContext = ObjectWrap::Unwrap<CanvasRenderingContext2D>(Local<Object>::Cast(otherContextObj));
       return getImageFromContext(otherContext);
     } else if (otherContextObj->IsObject() && (
-      JS_OBJ(JS_OBJ(otherContextObj)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("WebGLRenderingContext")) ||
-      JS_OBJ(JS_OBJ(otherContextObj)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("WebGL2RenderingContext"))
+      JS_OBJ(JS_OBJ(otherContextObj)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("WebGLRenderingContext")) ||
+      JS_OBJ(JS_OBJ(otherContextObj)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("WebGL2RenderingContext"))
     )) {
       WebGLRenderingContext *gl = ObjectWrap::Unwrap<WebGLRenderingContext>(Local<Object>::Cast(otherContextObj));
 

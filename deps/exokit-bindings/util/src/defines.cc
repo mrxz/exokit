@@ -3,15 +3,18 @@
 Local<Array> pointerToArray(void *ptr) {
   uintptr_t n = (uintptr_t)ptr;
   Local<Array> result = Nan::New<Array>(2);
-  result->Set(0, JS_NUM((uint32_t)(n >> 32)));
-  result->Set(1, JS_NUM((uint32_t)(n & 0xFFFFFFFF)));
+  Local<Context> context = Nan::GetCurrentContext();
+  result->Set(context, 0, JS_NUM((uint32_t)(n >> 32)));
+  result->Set(context, 1, JS_NUM((uint32_t)(n & 0xFFFFFFFF)));
   return result;
 }
 
 uintptr_t arrayToPointer(Local<Array> array) {
-  return ((uintptr_t)TO_UINT32(array->Get(0)) << 32) | (uintptr_t)TO_UINT32(array->Get(1));
+  Local<Context> context = Nan::GetCurrentContext();
+  return ((uintptr_t)TO_UINT32(array->Get(context, 0).ToLocalChecked()) << 32) | (uintptr_t)TO_UINT32(array->Get(context, 1).ToLocalChecked());
 }
 
 uintptr_t arrayToPointer(Local<Uint32Array> array) {
-  return ((uintptr_t)TO_UINT32(array->Get(0)) << 32) | (uintptr_t)TO_UINT32(array->Get(1));
+  Local<Context> context = Nan::GetCurrentContext();
+  return ((uintptr_t)TO_UINT32(array->Get(context, 0).ToLocalChecked()) << 32) | (uintptr_t)TO_UINT32(array->Get(context, 1).ToLocalChecked());
 }

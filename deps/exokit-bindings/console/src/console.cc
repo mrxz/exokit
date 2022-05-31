@@ -13,10 +13,10 @@ Local<Object> Initialize(Isolate *isolate) {
   Nan::EscapableHandleScope scope;
 
   Local<Object> result = Nan::New<Object>();
-  
+
   Local<FunctionTemplate> logFnTemplate = Nan::New<FunctionTemplate>(Log);
   Local<Function> logFn = Nan::GetFunction(logFnTemplate).ToLocalChecked();
-  result->Set(JS_STR("Log"), logFn);
+  result->Set(Nan::GetCurrentContext(), JS_STR("Log"), logFn);
 
   return scope.Escape(result);
 }

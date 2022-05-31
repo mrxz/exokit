@@ -12,7 +12,7 @@
   "scripts": {
     "build": "node-gyp build",
     "debug": "ndb",
-    "install": "node ./scripts/preinstall.js && node-gyp configure --msvs_version=2017 && node-gyp rebuild",
+    "install": "node ./scripts/preinstall.js && node-gyp configure && node-gyp rebuild",
     "lint": "eslint src tests",
     "rebuild": "shx rm -rf node_modules && npm cache clean --force && npm install",
     "serve": "serve examples",
@@ -71,7 +71,7 @@
     "native-openvr-deps": "0.0.19",
     "native-video-deps": "0.0.35",
     "native-webrtc-deps": "0.0.45",
-    "node-ipc": "^9.1.1",
+    "node-ipc": "9.1.1",
     "parse-int": "^1.0.2",
     "parse5": "^5.0.0",
     "redirect-output": "^1.0.0",

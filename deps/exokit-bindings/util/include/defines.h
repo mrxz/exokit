@@ -42,10 +42,11 @@ template <typename T>
 Local<T> createTypedArray(size_t size, const typename V8TypedArrayTraits<T>::value_type* data = NULL) {
   size_t byteLength = size * sizeof(typename V8TypedArrayTraits<T>::value_type);
   Local<ArrayBuffer> buffer = ArrayBuffer::New(Isolate::GetCurrent(), byteLength);
+  Local<Context> context = Nan::GetCurrentContext();
   Local<T> result = T::New(buffer, 0, size);
   if (data) {
     for (unsigned int i = 0; i < size; i++) {
-      result->Set(i, Nan::New(data[i]));
+      result->Set(context, i, Nan::New(data[i]));
     }
   }
   return result;
