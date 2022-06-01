@@ -1,5 +1,6 @@
 <h1 align="center">Exokit</h1>
 <p align="center"><a href="https://exokit.org" target="_blank"><img width="300" height="300" alt="Exokit" src="assets/icon.png"/></a></p>
+<h2>This is a WIP fork to get Exokit to work using OpenXR</h2>
 <p align="center"><b>:dark_sunglasses: Native VR and AR engine for JavaScript 🦖</b></p>
 
 <p align="center">
