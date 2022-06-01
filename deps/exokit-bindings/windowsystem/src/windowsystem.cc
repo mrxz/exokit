@@ -669,12 +669,12 @@ NAN_METHOD(CreateRenderTarget) {
   CreateRenderTarget(gl, width, height, &fbo, &colorTex, &depthStencilTex, &msFbo, &msColorTex, &msDepthStencilTex);
 
   Local<Array> result = Array::New(Isolate::GetCurrent(), 6);
-  result->Set(0, JS_INT(fbo));
-  result->Set(1, JS_INT(colorTex));
-  result->Set(2, JS_INT(depthStencilTex));
-  result->Set(3, JS_INT(msFbo));
-  result->Set(4, JS_INT(msColorTex));
-  result->Set(5, JS_INT(msDepthStencilTex));
+  result->Set(Nan::GetCurrentContext(), 0, JS_INT(fbo));
+  result->Set(Nan::GetCurrentContext(), 1, JS_INT(colorTex));
+  result->Set(Nan::GetCurrentContext(), 2, JS_INT(depthStencilTex));
+  result->Set(Nan::GetCurrentContext(), 3, JS_INT(msFbo));
+  result->Set(Nan::GetCurrentContext(), 4, JS_INT(msColorTex));
+  result->Set(Nan::GetCurrentContext(), 5, JS_INT(msDepthStencilTex));
   info.GetReturnValue().Set(result);
 }
 
@@ -753,12 +753,12 @@ NAN_METHOD(ResizeRenderTarget) {
   }
   
   Local<Array> result = Array::New(Isolate::GetCurrent(), 6);
-  result->Set(0, JS_INT(fbo));
-  result->Set(1, JS_INT(colorTex));
-  result->Set(2, JS_INT(depthStencilTex));
-  result->Set(3, JS_INT(msFbo));
-  result->Set(4, JS_INT(msColorTex));
-  result->Set(5, JS_INT(msDepthStencilTex));
+  result->Set(Nan::GetCurrentContext(), 0, JS_INT(fbo));
+  result->Set(Nan::GetCurrentContext(), 1, JS_INT(colorTex));
+  result->Set(Nan::GetCurrentContext(), 2, JS_INT(depthStencilTex));
+  result->Set(Nan::GetCurrentContext(), 3, JS_INT(msFbo));
+  result->Set(Nan::GetCurrentContext(), 4, JS_INT(msColorTex));
+  result->Set(Nan::GetCurrentContext(), 5, JS_INT(msDepthStencilTex));
   info.GetReturnValue().Set(result);
 }
 
@@ -843,12 +843,12 @@ NAN_METHOD(CreateVrTopRenderTarget) {
   CreateVrTopRenderTarget(width, height, &fbo, &colorTex, &depthStencilTex, &msFbo, &msColorTex, &msDepthStencilTex);
 
   Local<Array> result = Array::New(Isolate::GetCurrent(), 6);
-  result->Set(0, JS_INT(fbo));
-  result->Set(1, JS_INT(colorTex));
-  result->Set(2, JS_INT(depthStencilTex));
-  result->Set(3, JS_INT(msFbo));
-  result->Set(4, JS_INT(msColorTex));
-  result->Set(5, JS_INT(msDepthStencilTex));
+  result->Set(Nan::GetCurrentContext(), 0, JS_INT(fbo));
+  result->Set(Nan::GetCurrentContext(), 1, JS_INT(colorTex));
+  result->Set(Nan::GetCurrentContext(), 2, JS_INT(depthStencilTex));
+  result->Set(Nan::GetCurrentContext(), 3, JS_INT(msFbo));
+  result->Set(Nan::GetCurrentContext(), 4, JS_INT(msColorTex));
+  result->Set(Nan::GetCurrentContext(), 5, JS_INT(msDepthStencilTex));
   info.GetReturnValue().Set(result);
 }
 
@@ -924,10 +924,10 @@ NAN_METHOD(CreateVrCompositorRenderTarget) {
   CreateVrCompositorRenderTarget(gl, width, height, &fbo, &msFbo, &msColorTex, &msDepthStencilTex);
 
   Local<Array> result = Array::New(Isolate::GetCurrent(), 4);
-  result->Set(0, JS_INT(fbo));
-  result->Set(1, JS_INT(msFbo));
-  result->Set(2, JS_INT(msColorTex));
-  result->Set(3, JS_INT(msDepthStencilTex));
+  result->Set(Nan::GetCurrentContext(), 0, JS_INT(fbo));
+  result->Set(Nan::GetCurrentContext(), 1, JS_INT(msFbo));
+  result->Set(Nan::GetCurrentContext(), 2, JS_INT(msColorTex));
+  result->Set(Nan::GetCurrentContext(), 3, JS_INT(msDepthStencilTex));
   info.GetReturnValue().Set(result);
 }
 
@@ -1171,7 +1171,7 @@ NAN_METHOD(ComposeLayers) {
     std::vector<LayerSpec> layers;
     layers.reserve(8);
     for (size_t i = 0, size = array->Length(); i < size; i++) {
-      Local<Value> element = array->Get(i);
+      Local<Value> element = array->Get(Nan::GetCurrentContext(), i).ToLocalChecked();
 
       if (element->IsObject()) {
         Local<Object> elementObj = Local<Object>::Cast(element);
@@ -1253,9 +1253,9 @@ NAN_METHOD(ComposeLayers) {
             GLuint tex = TO_UINT32(Local<Object>::Cast(browserObj->Get(Nan::GetCurrentContext(), JS_STR("texture")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("id")).ToLocalChecked());
 
             Local<Float32Array> renderWidthFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(Nan::GetCurrentContext(), JS_STR("renderWidth")).ToLocalChecked());
-            const float renderWidth = TO_FLOAT(renderWidthFloat32Array->Get(0));
+            const float renderWidth = TO_FLOAT(renderWidthFloat32Array->Get(Nan::GetCurrentContext(), 0).ToLocalChecked());
             Local<Float32Array> renderHeightFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(Nan::GetCurrentContext(), JS_STR("renderHeight")).ToLocalChecked());
-            const float renderHeight = TO_FLOAT(renderHeightFloat32Array->Get(0));
+            const float renderHeight = TO_FLOAT(renderHeightFloat32Array->Get(Nan::GetCurrentContext(), 0).ToLocalChecked());
             std::vector<float> leftViewport = {
               0,
               0,

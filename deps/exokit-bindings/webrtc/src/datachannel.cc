@@ -169,13 +169,13 @@ void DataChannel::Run(uv_async_t* handle, int status) {
     TRACE_U("evt.type", evt.type);
     if (DataChannel::ERROR & evt.type) {
       DataChannel::ErrorEvent* data = static_cast<DataChannel::ErrorEvent*>(evt.data);
-      Local<Function> callback = Local<Function>::Cast(dc->Get(Nan::New("onerror").ToLocalChecked()));
+      Local<Function> callback = Local<Function>::Cast(dc->Get(Nan::GetCurrentContext(), Nan::New("onerror").ToLocalChecked()).ToLocalChecked());
       Local<Value> argv[1];
       argv[0] = Nan::Error(data->msg.c_str());
       Nan::MakeCallback(dc, callback, 1, argv);
     } else if (DataChannel::STATE & evt.type) {
       StateEvent* data = static_cast<StateEvent*>(evt.data);
-      Local<Function> callback = Local<Function>::Cast(dc->Get(Nan::New("onstatechange").ToLocalChecked()));
+      Local<Function> callback = Local<Function>::Cast(dc->Get(Nan::GetCurrentContext(), Nan::New("onstatechange").ToLocalChecked()).ToLocalChecked());
       Local<Value> argv[1];
       Local<Integer> state = Nan::New<Integer>((data->state));
       argv[0] = state;
@@ -186,7 +186,7 @@ void DataChannel::Run(uv_async_t* handle, int status) {
       }
     } else if (DataChannel::MESSAGE & evt.type) {
       MessageEvent* data = static_cast<MessageEvent*>(evt.data);
-      Local<Function> callback = Local<Function>::Cast(dc->Get(Nan::New("onmessage").ToLocalChecked()));
+      Local<Function> callback = Local<Function>::Cast(dc->Get(Nan::GetCurrentContext(), Nan::New("onmessage").ToLocalChecked()).ToLocalChecked());
 
       Local<Value> argv[1];
 
@@ -374,7 +374,7 @@ void DataChannel::Init(v8::Local<Object> exports) {
   Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New("readyState").ToLocalChecked(), GetReadyState, ReadOnly);
 
   constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
-  exports->Set(Nan::New("DataChannel").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+  exports->Set(Nan::GetCurrentContext(), Nan::New("DataChannel").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 
 #if NODE_MODULE_VERSION < 0x000C
   Local<Object> global = Nan::GetCurrentContext()->Global();

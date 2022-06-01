@@ -500,7 +500,7 @@ NAN_METHOD(Video::GetDevices) {
     const DeviceString& id(device.first);
     const DeviceString& name(device.second);
     Local<Object> obj = Object::New(Isolate::GetCurrent());
-    lst->Set(i++, obj);
+    lst->Set(Nan::GetCurrentContext(), i++, obj);
     obj->Set(Nan::GetCurrentContext(), JS_STR("id"), JS_STR(id.c_str()));
     obj->Set(Nan::GetCurrentContext(), JS_STR("name"), JS_STR(name.c_str()));
 
@@ -511,7 +511,7 @@ NAN_METHOD(Video::GetDevices) {
     size_t j = 0;
     for (auto mode : modes) {
       Local<Object> obj = Object::New(Isolate::GetCurrent());
-      lst->Set(j++, obj);
+      lst->Set(Nan::GetCurrentContext(), j++, obj);
       obj->Set(Nan::GetCurrentContext(), JS_STR("width"), JS_NUM(mode.width));
       obj->Set(Nan::GetCurrentContext(), JS_STR("height"), JS_NUM(mode.height));
       obj->Set(Nan::GetCurrentContext(), JS_STR("fps"), JS_NUM(mode.FPS));

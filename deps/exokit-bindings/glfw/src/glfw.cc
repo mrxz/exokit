@@ -252,8 +252,8 @@ NAN_METHOD(GetScreenSize) {
   GetScreenSize(&width, &height);
 
   Local<Array> result = Nan::New<Array>(2);
-  result->Set(0, JS_INT(width));
-  result->Set(1, JS_INT(height));
+  result->Set(Nan::GetCurrentContext(), 0, JS_INT(width));
+  result->Set(Nan::GetCurrentContext(), 1, JS_INT(height));
   info.GetReturnValue().Set(result);
 }
 
@@ -319,7 +319,7 @@ void APIENTRY windowDropCB(NATIVEwindow *window, int count, const char **paths) 
   QueueEvent(window, [localPaths{std::move(localPaths)}](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Array> pathsArray = Nan::New<Array>(localPaths.size());
     for (int i = 0; i < localPaths.size(); i++) {
-      pathsArray->Set(i, JS_STR(localPaths[i]));
+      pathsArray->Set(Nan::GetCurrentContext(), i, JS_STR(localPaths[i]));
     }
 
     Local<Object> evt = Nan::New<Object>();
@@ -1189,8 +1189,8 @@ NAN_METHOD(InitWindow3D) {
 #endif
 
   Local<Array> result = Nan::New<Array>(2);
-  result->Set(0, pointerToArray(windowHandle));
-  result->Set(1, JS_INT(vao));
+  result->Set(Nan::GetCurrentContext(), 0, pointerToArray(windowHandle));
+  result->Set(Nan::GetCurrentContext(), 1, JS_INT(vao));
   info.GetReturnValue().Set(result);
 }
 

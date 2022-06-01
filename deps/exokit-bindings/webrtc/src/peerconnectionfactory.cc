@@ -110,5 +110,5 @@ void PeerConnectionFactory::Init(v8::Local<Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
-  exports->Set(Nan::New("PeerConnectionFactory").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+  exports->Set(Nan::GetCurrentContext(), Nan::New("PeerConnectionFactory").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }

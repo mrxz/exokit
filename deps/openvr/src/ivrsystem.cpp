@@ -229,7 +229,7 @@ NAN_METHOD(IVRSystem::GetProjectionMatrix)
   Local<Float32Array> float32Array = Local<Float32Array>::Cast(info[3]);
   for (unsigned int v = 0; v < 4; v++) {
     for (unsigned int u = 0; u < 4; u++) {
-      float32Array->Set(v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
+      float32Array->Set(Nan::GetCurrentContext(), v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
     }
   }
 }
@@ -264,10 +264,10 @@ NAN_METHOD(IVRSystem::GetProjectionRaw)
   obj->self_->GetProjectionRaw(eEye, &fLeft, &fRight, &fTop, &fBottom);
 
   Local<Float32Array> float32Array = Local<Float32Array>::Cast(info[1]);
-  float32Array->Set(0, Nan::New<Number>(fLeft));
-  float32Array->Set(1, Nan::New<Number>(fRight));
-  float32Array->Set(2, Nan::New<Number>(fTop));
-  float32Array->Set(3, Nan::New<Number>(fBottom));
+  float32Array->Set(Nan::GetCurrentContext(), 0, Nan::New<Number>(fLeft));
+  float32Array->Set(Nan::GetCurrentContext(), 1, Nan::New<Number>(fRight));
+  float32Array->Set(Nan::GetCurrentContext(), 2, Nan::New<Number>(fTop));
+  float32Array->Set(Nan::GetCurrentContext(), 3, Nan::New<Number>(fBottom));
 }
 
 //=============================================================================
@@ -358,13 +358,13 @@ NAN_METHOD(IVRSystem::GetEyeToHeadTransform)
   Local<Float32Array> float32Array = Local<Float32Array>::Cast(info[1]);
   for (unsigned int v = 0; v < 4; v++) {
     for (unsigned int u = 0; u < 3; u++) {
-      float32Array->Set(v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
+      float32Array->Set(Nan::GetCurrentContext(), v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
     }
   }
-  float32Array->Set(0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-  float32Array->Set(1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-  float32Array->Set(2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-  float32Array->Set(3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
+  float32Array->Set(Nan::GetCurrentContext(), 0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+  float32Array->Set(Nan::GetCurrentContext(), 1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+  float32Array->Set(Nan::GetCurrentContext(), 2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+  float32Array->Set(Nan::GetCurrentContext(), 3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
 }
 
 //=============================================================================
@@ -517,9 +517,9 @@ NAN_METHOD(IVRSystem::GetDeviceToAbsoluteTrackingPose)
   Local<Float32Array> hmdFloat32Array = Local<Float32Array>::Cast(info[1]);
   Local<Float32Array> leftControllerFloat32Array = Local<Float32Array>::Cast(info[2]);
   Local<Float32Array> rightControllerFloat32Array = Local<Float32Array>::Cast(info[3]);
-  hmdFloat32Array->Set(0, Number::New(Isolate::GetCurrent(), std::numeric_limits<float>::quiet_NaN()));
-  leftControllerFloat32Array->Set(0, Number::New(Isolate::GetCurrent(), std::numeric_limits<float>::quiet_NaN()));
-  rightControllerFloat32Array->Set(0, Number::New(Isolate::GetCurrent(), std::numeric_limits<float>::quiet_NaN()));
+  hmdFloat32Array->Set(Nan::GetCurrentContext(), 0, Number::New(Isolate::GetCurrent(), std::numeric_limits<float>::quiet_NaN()));
+  leftControllerFloat32Array->Set(Nan::GetCurrentContext(), 0, Number::New(Isolate::GetCurrent(), std::numeric_limits<float>::quiet_NaN()));
+  rightControllerFloat32Array->Set(Nan::GetCurrentContext(), 0, Number::New(Isolate::GetCurrent(), std::numeric_limits<float>::quiet_NaN()));
 
   for (unsigned int i = 0; i < trackedDevicePoseArray.size(); i++) {
     const vr::TrackedDevicePose_t &trackedDevicePose = trackedDevicePoseArray[i];
@@ -530,13 +530,13 @@ NAN_METHOD(IVRSystem::GetDeviceToAbsoluteTrackingPose)
 
         for (unsigned int v = 0; v < 4; v++) {
           for (unsigned int u = 0; u < 3; u++) {
-            hmdFloat32Array->Set(v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
+            hmdFloat32Array->Set(Nan::GetCurrentContext(), v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
           }
         }
-        hmdFloat32Array->Set(0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-        hmdFloat32Array->Set(1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-        hmdFloat32Array->Set(2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-        hmdFloat32Array->Set(3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
+        hmdFloat32Array->Set(Nan::GetCurrentContext(), 0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+        hmdFloat32Array->Set(Nan::GetCurrentContext(), 1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+        hmdFloat32Array->Set(Nan::GetCurrentContext(), 2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+        hmdFloat32Array->Set(Nan::GetCurrentContext(), 3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
       } else if (deviceClass == vr::TrackedDeviceClass_Controller) {
         const vr::ETrackedControllerRole controllerRole = obj->self_->GetControllerRoleForTrackedDeviceIndex(i);
         if (controllerRole == vr::TrackedControllerRole_LeftHand) {
@@ -544,25 +544,25 @@ NAN_METHOD(IVRSystem::GetDeviceToAbsoluteTrackingPose)
 
           for (unsigned int v = 0; v < 4; v++) {
             for (unsigned int u = 0; u < 3; u++) {
-              leftControllerFloat32Array->Set(v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
+              leftControllerFloat32Array->Set(Nan::GetCurrentContext(), v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
             }
           }
-          leftControllerFloat32Array->Set(0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-          leftControllerFloat32Array->Set(1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-          leftControllerFloat32Array->Set(2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-          leftControllerFloat32Array->Set(3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
+          leftControllerFloat32Array->Set(Nan::GetCurrentContext(), 0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+          leftControllerFloat32Array->Set(Nan::GetCurrentContext(), 1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+          leftControllerFloat32Array->Set(Nan::GetCurrentContext(), 2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+          leftControllerFloat32Array->Set(Nan::GetCurrentContext(), 3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
         } else if (controllerRole == vr::TrackedControllerRole_LeftHand) {
           const vr::HmdMatrix34_t &matrix = trackedDevicePose.mDeviceToAbsoluteTracking;
 
           for (unsigned int v = 0; v < 4; v++) {
             for (unsigned int u = 0; u < 3; u++) {
-              rightControllerFloat32Array->Set(v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
+              rightControllerFloat32Array->Set(Nan::GetCurrentContext(), v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
             }
           }
-          rightControllerFloat32Array->Set(0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-          rightControllerFloat32Array->Set(1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-          rightControllerFloat32Array->Set(2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-          rightControllerFloat32Array->Set(3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
+          rightControllerFloat32Array->Set(Nan::GetCurrentContext(), 0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+          rightControllerFloat32Array->Set(Nan::GetCurrentContext(), 1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+          rightControllerFloat32Array->Set(Nan::GetCurrentContext(), 2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+          rightControllerFloat32Array->Set(Nan::GetCurrentContext(), 3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
         }
       }
     }
@@ -606,13 +606,13 @@ NAN_METHOD(IVRSystem::GetSeatedZeroPoseToStandingAbsoluteTrackingPose)
   Local<Float32Array> float32Array = Local<Float32Array>::Cast(info[0]);
   for (unsigned int v = 0; v < 4; v++) {
     for (unsigned int u = 0; u < 3; u++) {
-      float32Array->Set(v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
+      float32Array->Set(Nan::GetCurrentContext(), v * 4 + u, Number::New(Isolate::GetCurrent(), matrix.m[u][v]));
     }
   }
-  float32Array->Set(0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-  float32Array->Set(1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-  float32Array->Set(2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
-  float32Array->Set(3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
+  float32Array->Set(Nan::GetCurrentContext(), 0 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+  float32Array->Set(Nan::GetCurrentContext(), 1 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+  float32Array->Set(Nan::GetCurrentContext(), 2 * 4 + 3, Number::New(Isolate::GetCurrent(), 0));
+  float32Array->Set(Nan::GetCurrentContext(), 3 * 4 + 3, Number::New(Isolate::GetCurrent(), 1));
 }
 
 //=============================================================================

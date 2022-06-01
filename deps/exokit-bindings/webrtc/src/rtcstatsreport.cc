@@ -61,7 +61,7 @@ NAN_METHOD(RTCStatsReport::names) {
   for (auto const& pair : values) {
     const rtc::scoped_refptr<webrtc::StatsReport::Value> value = pair.second;
     std::string display_name = value->display_name();
-    names->Set(i++, Nan::New<String>(display_name).ToLocalChecked());
+    names->Set(Nan::GetCurrentContext(), i++, Nan::New<String>(display_name).ToLocalChecked());
   }
 
   TRACE_END;
@@ -129,5 +129,5 @@ void RTCStatsReport::Init(Local<Object> exports) {
   Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New("type").ToLocalChecked(), GetType, ReadOnly);
 
   constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
-  exports->Set(Nan::New("RTCStatsReport").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+  exports->Set(Nan::GetCurrentContext(), Nan::New("RTCStatsReport").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }

@@ -50,7 +50,7 @@ NAN_METHOD(RTCStatsResponse::result) {
     const void* copy = static_cast<const void*>(self->reports.at(i));
     Local<Value> cargv[1];
     cargv[0] = Nan::New<External>(const_cast<void*>(copy));
-    reports->Set(i, Nan::NewInstance(Nan::New(RTCStatsReport::constructor), 1, cargv).ToLocalChecked());
+    reports->Set(Nan::GetCurrentContext(), i, Nan::NewInstance(Nan::New(RTCStatsReport::constructor), 1, cargv).ToLocalChecked());
   }
 
   TRACE_END;
@@ -63,5 +63,5 @@ void RTCStatsResponse::Init(Local<Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   Nan::SetPrototypeMethod(tpl, "result", result);
   constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
-  exports->Set(Nan::New("RTCStatsResponse").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+  exports->Set(Nan::GetCurrentContext(), Nan::New("RTCStatsResponse").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
