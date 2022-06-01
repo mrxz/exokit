@@ -70,7 +70,7 @@ Local<Object> Browser::Initialize(Isolate *isolate) {
 
 NAN_METHOD(Browser::New) {
   if (
-    info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("WebGLRenderingContext")) &&
+    info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("WebGLRenderingContext")) &&
     info[1]->IsNumber() &&
     info[2]->IsNumber() &&
     info[3]->IsNumber() &&
@@ -486,13 +486,13 @@ NAN_METHOD(Browser::SendMouseWheel) {
 
 int GetKeyModifiers(Local<Object> modifiersObj) {
   int modifiers = 0;
-  if (TO_BOOL(modifiersObj->Get(JS_STR("shiftKey")))) {
+  if (TO_BOOL(modifiersObj->Get(Nan::GetCurrentContext(), JS_STR("shiftKey")).ToLocalChecked())) {
     modifiers |= (int)EmbeddedKeyModifiers::SHIFT;
   }
-  if (TO_BOOL(modifiersObj->Get(JS_STR("ctrlKey")))) {
+  if (TO_BOOL(modifiersObj->Get(Nan::GetCurrentContext(), JS_STR("ctrlKey")).ToLocalChecked())) {
     modifiers |= (int)EmbeddedKeyModifiers::CTRL;
   }
-  if (TO_BOOL(modifiersObj->Get(JS_STR("altKey")))) {
+  if (TO_BOOL(modifiersObj->Get(Nan::GetCurrentContext(), JS_STR("altKey")).ToLocalChecked())) {
     modifiers |= (int)EmbeddedKeyModifiers::ALT;
   }
   return modifiers;
@@ -523,7 +523,7 @@ map<int, int> keyCodesMap{
 };
 
 int MutateKey(int key, Local<Object> modifiersObj){
-  if (TO_BOOL(modifiersObj->Get(JS_STR("shiftKey")))){
+  if (TO_BOOL(modifiersObj->Get(Nan::GetCurrentContext(), JS_STR("shiftKey")).ToLocalChecked())){
     if (
       key >= 97 && // a
       key <= 122 // z
@@ -658,7 +658,7 @@ NAN_GETTER(Browser::TextureGetter) {
   Browser *browser = ObjectWrap::Unwrap<Browser>(info.This());
 
   Local<Object> textureObj = Nan::New<Object>();
-  textureObj->Set(JS_STR("id"), JS_INT(browser->tex));
+  textureObj->Set(Nan::GetCurrentContext(), JS_STR("id"), JS_INT(browser->tex));
   info.GetReturnValue().Set(textureObj);
 }
 

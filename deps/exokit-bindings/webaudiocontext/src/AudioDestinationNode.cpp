@@ -31,7 +31,7 @@ void AudioDestinationNode::InitializePrototype(Local<ObjectTemplate> proto) {
 NAN_METHOD(AudioDestinationNode::New) {
   // Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))) {
+  if (info[0]->IsObject() && info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))) {
     Local<Object> audioContextObj = Local<Object>::Cast(info[0]);
     AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
     // lab::AudioContext *labAudioContext = audioContext->audioContext;

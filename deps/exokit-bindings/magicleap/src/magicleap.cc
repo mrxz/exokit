@@ -274,7 +274,7 @@ static void onNewInitArg(void* application_context) {
 
   QueueEvent([=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("type"), JS_STR("newInitArg"));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR("newInitArg"));
     
     Local<Value> argv[] = {
       obj,
@@ -289,7 +289,7 @@ static void onStop(void* application_context) {
 
   QueueEvent([=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("type"), JS_STR("stop"));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR("stop"));
 
     Local<Value> argv[] = {
       obj,
@@ -304,7 +304,7 @@ static void onPause(void* application_context) {
   
   QueueEvent([=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("type"), JS_STR("pause"));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR("pause"));
     
     Local<Value> argv[] = {
       obj,
@@ -319,7 +319,7 @@ static void onResume(void* application_context) {
   
   QueueEvent([=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("type"), JS_STR("resume"));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR("resume"));
     
     Local<Value> argv[] = {
       obj,
@@ -334,7 +334,7 @@ static void onUnloadResources(void* application_context) {
   
   QueueEvent([=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("type"), JS_STR("unloadResources"));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR("unloadResources"));
     
     Local<Value> argv[] = {
       obj,
@@ -344,21 +344,21 @@ static void onUnloadResources(void* application_context) {
 }
 
 MLMat4f getWindowTransformMatrix(Local<Object> windowObj, bool inverse = true) {
-  Local<Object> localDocumentObj = Local<Object>::Cast(windowObj->Get(JS_STR("document")));
-  Local<Value> xrOffsetValue = localDocumentObj->Get(JS_STR("xrOffset"));
+  Local<Object> localDocumentObj = Local<Object>::Cast(windowObj->Get(Nan::GetCurrentContext(), JS_STR("document")).ToLocalChecked());
+  Local<Value> xrOffsetValue = localDocumentObj->Get(Nan::GetCurrentContext(), JS_STR("xrOffset")).ToLocalChecked();
 
   if (xrOffsetValue->IsObject()) {
     Local<Object> xrOffsetObj = Local<Object>::Cast(xrOffsetValue);
-    Local<Float32Array> positionFloat32Array = Local<Float32Array>::Cast(xrOffsetObj->Get(JS_STR("position")));
+    Local<Float32Array> positionFloat32Array = Local<Float32Array>::Cast(xrOffsetObj->Get(Nan::GetCurrentContext(), JS_STR("position")).ToLocalChecked());
     MLVec3f position;
     memcpy(position.values, (char *)positionFloat32Array->Buffer()->GetContents().Data() + positionFloat32Array->ByteOffset(), sizeof(position.values));
     position.y += largestFloorY;
     
-    Local<Float32Array> orientationFloat32Array = Local<Float32Array>::Cast(xrOffsetObj->Get(JS_STR("orientation")));
+    Local<Float32Array> orientationFloat32Array = Local<Float32Array>::Cast(xrOffsetObj->Get(Nan::GetCurrentContext(), JS_STR("orientation")).ToLocalChecked());
     MLQuaternionf orientation;
     memcpy(orientation.values, (char *)orientationFloat32Array->Buffer()->GetContents().Data() + orientationFloat32Array->ByteOffset(), sizeof(orientation.values));
     
-    Local<Float32Array> scaleFloat32Array = Local<Float32Array>::Cast(xrOffsetObj->Get(JS_STR("scale")));
+    Local<Float32Array> scaleFloat32Array = Local<Float32Array>::Cast(xrOffsetObj->Get(Nan::GetCurrentContext(), JS_STR("scale")).ToLocalChecked());
     MLVec3f scale;
     memcpy(scale.values, (char *)scaleFloat32Array->Buffer()->GetContents().Data() + scaleFloat32Array->ByteOffset(), sizeof(scale.values));
 
@@ -452,7 +452,7 @@ NAN_METHOD(MLRaycaster::WaitGetPoses) {
 
       Local<Object> xrHitResult = Nan::New<Object>();
       Local<Float32Array> hitMatrixArray = Float32Array::New(ArrayBuffer::New(Isolate::GetCurrent(), (void *)hitMatrix.matrix_colmajor, sizeof(hitMatrix.matrix_colmajor)), 0, 16);
-      xrHitResult->Set(JS_STR("hitMatrix"), hitMatrixArray);
+      xrHitResult->Set(Nan::GetCurrentContext(), JS_STR("hitMatrix"), hitMatrixArray);
       Local<Array> result = Nan::New<Array>(1);
       result->Set(0, xrHitResult);
       info.GetReturnValue().Set(result);
@@ -780,7 +780,7 @@ NAN_METHOD(MLMesher::WaitGetPoses) {
 
         if (meshInfo.state == MLMeshingMeshState_New || (meshInfo.state == MLMeshingMeshState_Updated && blockMesh.index_count > 0) || MLMeshingMeshState_Deleted) {
           Local<Object> obj = Nan::New<Object>();
-          obj->Set(JS_STR("id"), JS_STR(id));
+          obj->Set(Nan::GetCurrentContext(), JS_STR("id"), JS_STR(id));
 
           const char *typeString;
           if (meshInfo.state == MLMeshingMeshState_New) {
@@ -794,29 +794,29 @@ NAN_METHOD(MLMesher::WaitGetPoses) {
           } else {
             typeString = "";
           }
-          obj->Set(JS_STR("type"), JS_STR(typeString));
+          obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR(typeString));
 
           if (meshInfo.state == MLMeshingMeshState_New || meshInfo.state == MLMeshingMeshState_Updated) {
             /* Local<Float32Array> transformMatrixArray = Float32Array::New(ArrayBuffer::New(Isolate::GetCurrent(), (void *)transformMatrix.matrix_colmajor, 16 * sizeof(float)), 0, 16);
-            obj->Set(JS_STR("transformMatrix"), transformMatrixArray); */
+            obj->Set(Nan::GetCurrentContext(), JS_STR("transformMatrix"), transformMatrixArray); */
 
             Local<SharedArrayBuffer> positionArrayBuffer = SharedArrayBuffer::New(Isolate::GetCurrent(), blockMesh.vertex_count * 3 * sizeof(float));
             Local<Float32Array> positionArray = Float32Array::New(positionArrayBuffer, 0, blockMesh.vertex_count * 3);
             memcpy(positionArrayBuffer->GetContents().Data(), blockMesh.vertex, blockMesh.vertex_count * 3 * sizeof(float));
-            obj->Set(JS_STR("positionArray"), positionArray);
-            // obj->Set(JS_STR("positionCount"), JS_INT(blockMesh.vertex_count * 3));
+            obj->Set(Nan::GetCurrentContext(), JS_STR("positionArray"), positionArray);
+            // obj->Set(Nan::GetCurrentContext(), JS_STR("positionCount"), JS_INT(blockMesh.vertex_count * 3));
 
             Local<SharedArrayBuffer> normalArrayBuffer = SharedArrayBuffer::New(Isolate::GetCurrent(), blockMesh.vertex_count * 3 * sizeof(float));
             Local<Float32Array> normalArray = Float32Array::New(normalArrayBuffer, 0, blockMesh.vertex_count * 3);
             memcpy(normalArrayBuffer->GetContents().Data(), blockMesh.normal, blockMesh.vertex_count * 3 * sizeof(float));
-            obj->Set(JS_STR("normalArray"), normalArray);
-            // obj->Set(JS_STR("normalCount"), JS_INT(blockMesh.vertex_count * 3));
+            obj->Set(Nan::GetCurrentContext(), JS_STR("normalArray"), normalArray);
+            // obj->Set(Nan::GetCurrentContext(), JS_STR("normalCount"), JS_INT(blockMesh.vertex_count * 3));
 
             Local<SharedArrayBuffer> indexArrayBuffer = SharedArrayBuffer::New(Isolate::GetCurrent(), blockMesh.index_count * sizeof(uint16_t));
             Local<Uint16Array> indexArray = Uint16Array::New(indexArrayBuffer, 0, blockMesh.index_count);
             memcpy(indexArrayBuffer->GetContents().Data(), blockMesh.index, blockMesh.index_count * sizeof(uint16_t));
-            obj->Set(JS_STR("indexArray"), indexArray);
-            // obj->Set(JS_STR("count"), JS_INT(blockMesh.index_count));
+            obj->Set(Nan::GetCurrentContext(), JS_STR("indexArray"), indexArray);
+            // obj->Set(Nan::GetCurrentContext(), JS_STR("count"), JS_INT(blockMesh.index_count));
             
             MLVec3f position = mlContext->OffsetFloor(MLVec3f{0, 0, 0}); // {0, 0, 0};
             MLQuaternionf rotation = {0, 0, 0, 1};
@@ -827,7 +827,7 @@ NAN_METHOD(MLMesher::WaitGetPoses) {
             Local<Float32Array> transformMatrixArray = Float32Array::New(transformMatrixArrayBuffer, 0, 16);
             float *transformMatrixData = (float *)((char *)transformMatrixArrayBuffer->GetContents().Data());
             memcpy(transformMatrixData, transform.matrix_colmajor, sizeof(transform.matrix_colmajor));
-            obj->Set(JS_STR("transformMatrix"), transformMatrixArray);
+            obj->Set(Nan::GetCurrentContext(), JS_STR("transformMatrix"), transformMatrixArray);
           }
 
           result->Set(index, obj);
@@ -1006,7 +1006,7 @@ NAN_METHOD(MLPlaneTracker::WaitGetPoses) {
 
         Local<Object> obj = Nan::New<Object>();
 
-        obj->Set(JS_STR("id"), JS_STR(id));
+        obj->Set(Nan::GetCurrentContext(), JS_STR("id"), JS_STR(id));
 
         bool added = false;
         bool removed = false;
@@ -1021,7 +1021,7 @@ NAN_METHOD(MLPlaneTracker::WaitGetPoses) {
           updated = true;
           typeString = "planeupdate";
         }
-        obj->Set(JS_STR("type"), JS_STR(typeString));
+        obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR(typeString));
 
         if (added || updated) {
           // uint32_t flags = plane.flags;
@@ -1036,16 +1036,16 @@ NAN_METHOD(MLPlaneTracker::WaitGetPoses) {
           size_t index = 0;
 
           memcpy(arrayBufferData + index, position.values, sizeof(position.values));
-          obj->Set(JS_STR("position"), Float32Array::New(arrayBuffer, index, sizeof(position.values)/sizeof(position.values[0])));
+          obj->Set(Nan::GetCurrentContext(), JS_STR("position"), Float32Array::New(arrayBuffer, index, sizeof(position.values)/sizeof(position.values[0])));
           index += sizeof(position.values);
 
           memcpy(arrayBufferData + index, normal.values, sizeof(normal.values));
-          obj->Set(JS_STR("normal"), Float32Array::New(arrayBuffer, index, sizeof(normal.values)/sizeof(normal.values[0])));
+          obj->Set(Nan::GetCurrentContext(), JS_STR("normal"), Float32Array::New(arrayBuffer, index, sizeof(normal.values)/sizeof(normal.values[0])));
           index += sizeof(normal.values);
 
           ((float *)(arrayBufferData + index))[0] = width;
           ((float *)(arrayBufferData + index))[1] = height;
-          obj->Set(JS_STR("size"), Float32Array::New(arrayBuffer, index, 2));
+          obj->Set(Nan::GetCurrentContext(), JS_STR("size"), Float32Array::New(arrayBuffer, index, 2));
           index += 2*sizeof(float);
         }
 
@@ -1253,20 +1253,20 @@ NAN_METHOD(MLHandTracker::WaitGetPoses) {
       for (int i = 0; i < 2; i++) {
         Local<Object> handObj = Local<Object>::Cast(handsArray->Get(i));
 
-        Local<Float32Array> connectedArray = Local<Float32Array>::Cast(handObj->Get(JS_STR("connected")));
+        Local<Float32Array> connectedArray = Local<Float32Array>::Cast(handObj->Get(Nan::GetCurrentContext(), JS_STR("connected")).ToLocalChecked());
         auto &handDataState = i == 0 ? handData.left_hand_state : handData.right_hand_state;
         const bool handVisible = handDataState.hand_confidence >= 0.5;
         connectedArray->Set(0, JS_NUM(handVisible ? 1 : 0));
 
         if (handVisible) {
           const MLVec3f &position = mlContext->OffsetFloor(MLVec3f{0, 0, 0});
-          Local<Float32Array> positionArray = Local<Float32Array>::Cast(handObj->Get(JS_STR("position")));
+          Local<Float32Array> positionArray = Local<Float32Array>::Cast(handObj->Get(Nan::GetCurrentContext(), JS_STR("position")).ToLocalChecked());
           float *positionArrayData = (float *)((char *)positionArray->Buffer()->GetContents().Data() + positionArray->ByteOffset());
           positionArrayData[0] = position.x;
           positionArrayData[1] = position.y;
           positionArrayData[2] = position.z;
 
-          Local<Float32Array> orientationArray = Local<Float32Array>::Cast(handObj->Get(JS_STR("orientation")));
+          Local<Float32Array> orientationArray = Local<Float32Array>::Cast(handObj->Get(Nan::GetCurrentContext(), JS_STR("orientation")).ToLocalChecked());
           float *orientationArrayData = (float *)((char *)orientationArray->Buffer()->GetContents().Data() + orientationArray->ByteOffset());
           orientationArrayData[0] = 0;
           orientationArrayData[1] = 0;
@@ -1278,30 +1278,30 @@ NAN_METHOD(MLHandTracker::WaitGetPoses) {
           // wrist
           {
             auto &handStaticDataSideFinger = handStaticDataSide.wrist;
-            Local<Array> wristArray = Local<Array>::Cast(handObj->Get(JS_STR("wrist")));
+            Local<Array> wristArray = Local<Array>::Cast(handObj->Get(Nan::GetCurrentContext(), JS_STR("wrist")).ToLocalChecked());
             {
               Local<Float32Array> wristBoneFloat32Array = Local<Float32Array>::Cast(wristArray->Get(0));
-              float *wristBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(wristBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + wristBoneFloat32Array->ByteOffset());
+              float *wristBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(wristBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + wristBoneFloat32Array->ByteOffset());
               setFingerValue(handStaticDataSideFinger.radial, snapshot, wristBoneArrayData);
             }
             {
               Local<Float32Array> wristBoneFloat32Array = Local<Float32Array>::Cast(wristArray->Get(1));
-              float *wristBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(wristBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + wristBoneFloat32Array->ByteOffset());
+              float *wristBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(wristBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + wristBoneFloat32Array->ByteOffset());
               setFingerValue(handStaticDataSideFinger.ulnar, snapshot, wristBoneArrayData);
             }
             {
               Local<Float32Array> wristBoneFloat32Array = Local<Float32Array>::Cast(wristArray->Get(2));
-              float *wristBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(wristBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + wristBoneFloat32Array->ByteOffset());
+              float *wristBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(wristBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + wristBoneFloat32Array->ByteOffset());
               setFingerValue(handStaticDataSideFinger.center, snapshot, wristBoneArrayData);
             }
             {
               Local<Float32Array> wristBoneFloat32Array = Local<Float32Array>::Cast(wristArray->Get(3));
-              float *wristBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(wristBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + wristBoneFloat32Array->ByteOffset());
+              float *wristBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(wristBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + wristBoneFloat32Array->ByteOffset());
               setFingerValue(wristBoneArrayData);
             }
           }
 
-          Local<Array> fingersArray = Local<Array>::Cast(handObj->Get(JS_STR("fingers")));
+          Local<Array> fingersArray = Local<Array>::Cast(handObj->Get(Nan::GetCurrentContext(), JS_STR("fingers")).ToLocalChecked());
           {
             // thumb
             {
@@ -1309,22 +1309,22 @@ NAN_METHOD(MLHandTracker::WaitGetPoses) {
               Local<Array> fingerArray = Local<Array>::Cast(fingersArray->Get(0));
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(0));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.cmc, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(1));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.mcp, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(2));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.ip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(3));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.tip, snapshot, fingerBoneArrayData);
               }
             }
@@ -1335,22 +1335,22 @@ NAN_METHOD(MLHandTracker::WaitGetPoses) {
               Local<Array> fingerArray = Local<Array>::Cast(fingersArray->Get(1));
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(0));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.mcp, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(1));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.pip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(2));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.dip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(3));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.tip, snapshot, fingerBoneArrayData);
               }
             }
@@ -1361,22 +1361,22 @@ NAN_METHOD(MLHandTracker::WaitGetPoses) {
               Local<Array> fingerArray = Local<Array>::Cast(fingersArray->Get(2));
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(0));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.mcp, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(1));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.pip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(2));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.dip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(3));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.tip, snapshot, fingerBoneArrayData);
               }
             }
@@ -1387,22 +1387,22 @@ NAN_METHOD(MLHandTracker::WaitGetPoses) {
               Local<Array> fingerArray = Local<Array>::Cast(fingersArray->Get(3));
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(0));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.mcp, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(1));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.pip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(2));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.dip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(3));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.tip, snapshot, fingerBoneArrayData);
               }
             }
@@ -1413,22 +1413,22 @@ NAN_METHOD(MLHandTracker::WaitGetPoses) {
               Local<Array> fingerArray = Local<Array>::Cast(fingersArray->Get(4));
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(0));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.mcp, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(1));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.pip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(2));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.dip, snapshot, fingerBoneArrayData);
               }
               {
                 Local<Float32Array> fingerBoneFloat32Array = Local<Float32Array>::Cast(fingerArray->Get(3));
-                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(JS_STR("buffer")))->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
+                float *fingerBoneArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(fingerBoneFloat32Array->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + fingerBoneFloat32Array->ByteOffset());
                 setFingerValue(handStaticDataSideFinger.tip, snapshot, fingerBoneArrayData);
               }
             }
@@ -1521,16 +1521,16 @@ NAN_METHOD(MLEyeTracker::WaitGetPoses) {
   }
 
   const MLVec3f &position = mlContext->OffsetFloor(transform.position);
-  Local<Float32Array> positionArray = Local<Float32Array>::Cast(eyeObj->Get(JS_STR("position")));
-  float *positionArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(positionArray->Get(JS_STR("buffer")))->GetContents().Data() + positionArray->ByteOffset());
+  Local<Float32Array> positionArray = Local<Float32Array>::Cast(eyeObj->Get(Nan::GetCurrentContext(), JS_STR("position")).ToLocalChecked());
+  float *positionArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(positionArray->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + positionArray->ByteOffset());
   memcpy(positionArrayData, position.values, sizeof(position.values));
 
-  Local<Float32Array> orientationArray = Local<Float32Array>::Cast(eyeObj->Get(JS_STR("orientation")));
-  float *orientationArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(orientationArray->Get(JS_STR("buffer")))->GetContents().Data() + orientationArray->ByteOffset());
+  Local<Float32Array> orientationArray = Local<Float32Array>::Cast(eyeObj->Get(Nan::GetCurrentContext(), JS_STR("orientation")).ToLocalChecked());
+  float *orientationArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(orientationArray->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + orientationArray->ByteOffset());
   memcpy(orientationArrayData, transform.rotation.values, sizeof(transform.rotation.values));
 
-  Local<Float32Array> axesArray = Local<Float32Array>::Cast(eyeObj->Get(JS_STR("axes")));
-  float *axesArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(axesArray->Get(JS_STR("buffer")))->GetContents().Data() + axesArray->ByteOffset());
+  Local<Float32Array> axesArray = Local<Float32Array>::Cast(eyeObj->Get(Nan::GetCurrentContext(), JS_STR("axes")).ToLocalChecked());
+  float *axesArrayData = (float *)((char *)Local<SharedArrayBuffer>::Cast(axesArray->Get(Nan::GetCurrentContext(), JS_STR("buffer")).ToLocalChecked())->GetContents().Data() + axesArray->ByteOffset());
   axesArrayData[0] = eyeState.left_blink ? -1 : 1;
   axesArrayData[1] = eyeState.right_blink ? -1 : 1;
 
@@ -1888,24 +1888,24 @@ inline uint32_t mlKeycodeToKeycode(MLKeyCode mlKeycode) {
 
 void setKeyEvent(Local<Object> obj, uint32_t charCode, MLKeyCode mlKeyCode, uint32_t modifier_mask) {
   uint32_t keyCode = mlKeycodeToKeycode(mlKeyCode);
-  obj->Set(JS_STR("charCode"), JS_INT(charCode));
-  obj->Set(JS_STR("keyCode"), JS_INT(keyCode));
-  obj->Set(JS_STR("which"), JS_INT(keyCode));
-  obj->Set(JS_STR("shiftKey"), JS_BOOL(modifier_mask & MLKEYMODIFIER_SHIFT));
-  obj->Set(JS_STR("altKey"), JS_BOOL(modifier_mask & MLKEYMODIFIER_ALT));
-  obj->Set(JS_STR("ctrlKey"), JS_BOOL(modifier_mask & MLKEYMODIFIER_CTRL));
-  obj->Set(JS_STR("metaKey"), JS_BOOL(modifier_mask & MLKEYMODIFIER_META));
-  // obj->Set(JS_STR("sym"), JS_BOOL(modifier_mask & MLKEYMODIFIER_SYM));
-  // obj->Set(JS_STR("function"), JS_BOOL(modifier_mask & MLKEYMODIFIER_FUNCTION));
-  // obj->Set(JS_STR("capsLock"), JS_BOOL(modifier_mask & MLKEYMODIFIER_CAPS_LOCK));
-  // obj->Set(JS_STR("numLock"), JS_BOOL(modifier_mask & MLKEYMODIFIER_NUM_LOCK));
-  // obj->Set(JS_STR("scrollLock"), JS_BOOL(modifier_mask & MLKEYMODIFIER_SCROLL_LOCK));
+  obj->Set(Nan::GetCurrentContext(), JS_STR("charCode"), JS_INT(charCode));
+  obj->Set(Nan::GetCurrentContext(), JS_STR("keyCode"), JS_INT(keyCode));
+  obj->Set(Nan::GetCurrentContext(), JS_STR("which"), JS_INT(keyCode));
+  obj->Set(Nan::GetCurrentContext(), JS_STR("shiftKey"), JS_BOOL(modifier_mask & MLKEYMODIFIER_SHIFT));
+  obj->Set(Nan::GetCurrentContext(), JS_STR("altKey"), JS_BOOL(modifier_mask & MLKEYMODIFIER_ALT));
+  obj->Set(Nan::GetCurrentContext(), JS_STR("ctrlKey"), JS_BOOL(modifier_mask & MLKEYMODIFIER_CTRL));
+  obj->Set(Nan::GetCurrentContext(), JS_STR("metaKey"), JS_BOOL(modifier_mask & MLKEYMODIFIER_META));
+  // obj->Set(Nan::GetCurrentContext(), JS_STR("sym"), JS_BOOL(modifier_mask & MLKEYMODIFIER_SYM));
+  // obj->Set(Nan::GetCurrentContext(), JS_STR("function"), JS_BOOL(modifier_mask & MLKEYMODIFIER_FUNCTION));
+  // obj->Set(Nan::GetCurrentContext(), JS_STR("capsLock"), JS_BOOL(modifier_mask & MLKEYMODIFIER_CAPS_LOCK));
+  // obj->Set(Nan::GetCurrentContext(), JS_STR("numLock"), JS_BOOL(modifier_mask & MLKEYMODIFIER_NUM_LOCK));
+  // obj->Set(Nan::GetCurrentContext(), JS_STR("scrollLock"), JS_BOOL(modifier_mask & MLKEYMODIFIER_SCROLL_LOCK));
 }
 
 void onChar(uint32_t char_utf32, void *data) {
   QueueEvent([=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("type"), JS_STR("keypress"));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR("keypress"));
     setKeyEvent(obj, char_utf32, MLKEYCODE_UNKNOWN, 0);
     
     Local<Value> argv[] = {
@@ -1917,7 +1917,7 @@ void onChar(uint32_t char_utf32, void *data) {
 void onKeyDown(MLKeyCode key_code, uint32_t modifier_mask, void *data) {
   QueueEvent([=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("type"), JS_STR("keydown"));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR("keydown"));
     setKeyEvent(obj, 0, key_code, modifier_mask);
     
     Local<Value> argv[] = {
@@ -1929,7 +1929,7 @@ void onKeyDown(MLKeyCode key_code, uint32_t modifier_mask, void *data) {
 void onKeyUp(MLKeyCode key_code, uint32_t modifier_mask, void *data) {
   QueueEvent([=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("type"), JS_STR("keyup"));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR("keyup"));
     setKeyEvent(obj, 0, key_code, modifier_mask);
     
     Local<Value> argv[] = {
@@ -2028,12 +2028,12 @@ void CameraRequest::Update() {
     Local<Function> cbFn = Nan::New(this->cbFn);
 
     Local<Object> obj = Nan::New<Object>();
-    obj->Set(JS_STR("data"), Nan::New(data));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("data"), Nan::New(data));
     data.Reset();
-    obj->Set(JS_STR("width"), JS_INT(width));
-    obj->Set(JS_STR("height"), JS_INT(height));
-    // obj->Set(JS_STR("bpp"), JS_INT(bpp));
-    // obj->Set(JS_STR("stride"), JS_INT(stride));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("width"), JS_INT(width));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("height"), JS_INT(height));
+    // obj->Set(Nan::GetCurrentContext(), JS_STR("bpp"), JS_INT(bpp));
+    // obj->Set(Nan::GetCurrentContext(), JS_STR("stride"), JS_INT(stride));
 
     Local<Value> argv[] = {
       obj,
@@ -2081,7 +2081,7 @@ NAN_METHOD(MLImageTracker::New) {
   trackerSettings.name = name;
 
   Image *image = ObjectWrap::Unwrap<Image>(imageObj);
-  Local<Uint8ClampedArray> dataArray = Local<Uint8ClampedArray>::Cast(imageObj->Get(JS_STR("data")));
+  Local<Uint8ClampedArray> dataArray = Local<Uint8ClampedArray>::Cast(imageObj->Get(Nan::GetCurrentContext(), JS_STR("data")).ToLocalChecked());
   Local<ArrayBuffer> dataArrayBuffer = dataArray->Buffer();
 
   uint32_t width = image->GetWidth();
@@ -2200,14 +2200,14 @@ void MLImageTracker::Update(MLSnapshot *snapshot) {
               size_t index = 0;
 
               memcpy(arrayBufferData + index, position.values, sizeof(position.values));
-              objVal->Set(JS_STR("position"), Float32Array::New(arrayBuffer, index, sizeof(position.values)/sizeof(position.values[0])));
+              objVal->Set(Nan::GetCurrentContext(), JS_STR("position"), Float32Array::New(arrayBuffer, index, sizeof(position.values)/sizeof(position.values[0])));
               index += sizeof(position.values);
 
               memcpy(arrayBufferData + index, rotation.values, sizeof(rotation.values));
-              objVal->Set(JS_STR("rotation"), Float32Array::New(arrayBuffer, index, sizeof(rotation.values)/sizeof(rotation.values[0])));
+              objVal->Set(Nan::GetCurrentContext(), JS_STR("rotation"), Float32Array::New(arrayBuffer, index, sizeof(rotation.values)/sizeof(rotation.values[0])));
               index += sizeof(rotation.values);
 
-              objVal->Set(JS_STR("size"), JS_NUM(this->size));
+              objVal->Set(Nan::GetCurrentContext(), JS_STR("size"), JS_NUM(this->size));
 
               Local<Value> argv[] = {
                 objVal,
@@ -2941,14 +2941,14 @@ NAN_METHOD(MLContext::Present) {
   // ML_LOG(Info, "%s: Start loop.", application_name);
 
   /* Local<Object> result = Nan::New<Object>();
-  result->Set(JS_STR("width"), JS_INT(halfWidth));
-  result->Set(JS_STR("height"), JS_INT(height));
-  result->Set(JS_STR("fbo"), JS_INT(fbo));
-  result->Set(JS_STR("colorTex"), JS_INT(colorTex));
-  result->Set(JS_STR("depthStencilTex"), JS_INT(depthStencilTex));
-  result->Set(JS_STR("msFbo"), JS_INT(msFbo));
-  result->Set(JS_STR("msColorTex"), JS_INT(msColorTex));
-  result->Set(JS_STR("msDepthStencilTex"), JS_INT(msDepthStencilTex));
+  result->Set(Nan::GetCurrentContext(), JS_STR("width"), JS_INT(halfWidth));
+  result->Set(Nan::GetCurrentContext(), JS_STR("height"), JS_INT(height));
+  result->Set(Nan::GetCurrentContext(), JS_STR("fbo"), JS_INT(fbo));
+  result->Set(Nan::GetCurrentContext(), JS_STR("colorTex"), JS_INT(colorTex));
+  result->Set(Nan::GetCurrentContext(), JS_STR("depthStencilTex"), JS_INT(depthStencilTex));
+  result->Set(Nan::GetCurrentContext(), JS_STR("msFbo"), JS_INT(msFbo));
+  result->Set(Nan::GetCurrentContext(), JS_STR("msColorTex"), JS_INT(msColorTex));
+  result->Set(Nan::GetCurrentContext(), JS_STR("msDepthStencilTex"), JS_INT(msDepthStencilTex));
   info.GetReturnValue().Set(result); */
 }
 
@@ -3448,8 +3448,8 @@ NAN_METHOD(MLContext::GetSize) {
   unsigned int height = mlContext->render_targets_info.buffers[0].color.height;
   
   Local<Object> result = Nan::New<Object>();
-  result->Set(JS_STR("width"), JS_INT(halfWidth));
-  result->Set(JS_STR("height"), JS_INT(height));
+  result->Set(Nan::GetCurrentContext(), JS_STR("width"), JS_INT(halfWidth));
+  result->Set(Nan::GetCurrentContext(), JS_STR("height"), JS_INT(height));
   info.GetReturnValue().Set(result);
 }
 
@@ -3579,9 +3579,9 @@ NAN_METHOD(MLContext::RequestImageTracking) {
     Local<Object> imageObj = Local<Object>::Cast(info[1]);
 
     if (
-      JS_OBJ(imageObj->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLImageElement")) &&
-      imageObj->Get(JS_STR("image"))->IsObject() &&
-      JS_OBJ(imageObj->Get(JS_STR("image")))->Get(JS_STR("data"))->IsUint8ClampedArray()
+      JS_OBJ(imageObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLImageElement")) &&
+      imageObj->Get(Nan::GetCurrentContext(), JS_STR("image")).ToLocalChecked()->IsObject() &&
+      JS_OBJ(imageObj->Get(Nan::GetCurrentContext(), JS_STR("image")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("data")).ToLocalChecked()->IsUint8ClampedArray()
     ) {
       MLContext *mlContext = ObjectWrap::Unwrap<MLContext>(Local<Object>::Cast(info.This()));
       if (mlContext->mlImageTrackerConstructor.IsEmpty()) {
@@ -3590,7 +3590,7 @@ NAN_METHOD(MLContext::RequestImageTracking) {
       Local<Function> mlImageTrackerCons = Nan::New(mlContext->mlImageTrackerConstructor);
       Local<Value> argv[] = {
         windowObj,
-        imageObj->Get(JS_STR("image")),
+        imageObj->Get(Nan::GetCurrentContext(), JS_STR("image")).ToLocalChecked(),
         info[2],
       };
       Local<Object> mlImageTrackerObj = mlImageTrackerCons->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv)/sizeof(argv[0]), argv).ToLocalChecked();

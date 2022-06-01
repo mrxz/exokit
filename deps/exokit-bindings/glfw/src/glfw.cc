@@ -187,37 +187,37 @@ NAN_METHOD(GetMonitors) {
   Local<Array> js_modes;
   for(i=0; i<monitor_count; i++){
     js_monitor = Nan::New<Object>();
-    js_monitor->Set(JS_STR("is_primary"), JS_BOOL(monitors[i] == primary));
-    js_monitor->Set(JS_STR("index"), JS_INT(i));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("is_primary"), JS_BOOL(monitors[i] == primary));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("index"), JS_INT(i));
 
-    js_monitor->Set(JS_STR("name"), JS_STR(glfwGetMonitorName(monitors[i])));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("name"), JS_STR(glfwGetMonitorName(monitors[i])));
 
     glfwGetMonitorPos(monitors[i], &xpos, &ypos);
-    js_monitor->Set(JS_STR("pos_x"), JS_INT(xpos));
-    js_monitor->Set(JS_STR("pos_y"), JS_INT(ypos));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("pos_x"), JS_INT(xpos));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("pos_y"), JS_INT(ypos));
 
     glfwGetMonitorPhysicalSize(monitors[i], &width, &height);
-    js_monitor->Set(JS_STR("width_mm"), JS_INT(width));
-    js_monitor->Set(JS_STR("height_mm"), JS_INT(height));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("width_mm"), JS_INT(width));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("height_mm"), JS_INT(height));
 
     mode = glfwGetVideoMode(monitors[i]);
-    js_monitor->Set(JS_STR("width"), JS_INT(mode->width));
-    js_monitor->Set(JS_STR("height"), JS_INT(mode->height));
-    js_monitor->Set(JS_STR("rate"), JS_INT(mode->refreshRate));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("width"), JS_INT(mode->width));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("height"), JS_INT(mode->height));
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("rate"), JS_INT(mode->refreshRate));
 
     modes = glfwGetVideoModes(monitors[i], &mode_count);
     js_modes = Nan::New<Array>(mode_count);
     for(j=0; j<mode_count; j++){
       js_mode = Nan::New<Object>();
-      js_mode->Set(JS_STR("width"), JS_INT(modes[j].width));
-      js_mode->Set(JS_STR("height"), JS_INT(modes[j].height));
-      js_mode->Set(JS_STR("rate"), JS_INT(modes[j].refreshRate));
+      js_mode->Set(Nan::GetCurrentContext(), JS_STR("width"), JS_INT(modes[j].width));
+      js_mode->Set(Nan::GetCurrentContext(), JS_STR("height"), JS_INT(modes[j].height));
+      js_mode->Set(Nan::GetCurrentContext(), JS_STR("rate"), JS_INT(modes[j].refreshRate));
       // NOTE: Are color bits necessary?
-      js_modes->Set(JS_INT(j), js_mode);
+      js_modes->Set(Nan::GetCurrentContext(), JS_INT(j), js_mode);
     }
-    js_monitor->Set(JS_STR("modes"), js_modes);
+    js_monitor->Set(Nan::GetCurrentContext(), JS_STR("modes"), js_modes);
 
-    js_monitors->Set(JS_INT(i), js_monitor);
+    js_monitors->Set(Nan::GetCurrentContext(), JS_INT(i), js_monitor);
   }
 
   info.GetReturnValue().Set(js_monitors);
@@ -261,10 +261,10 @@ NAN_METHOD(GetScreenSize) {
 void APIENTRY windowPosCB(NATIVEwindow *window, int xpos, int ypos) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("move"));
-    evt->Set(JS_STR("x"),JS_INT(xpos));
-    evt->Set(JS_STR("y"),JS_INT(ypos));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("move"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("x"),JS_INT(xpos));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("y"),JS_INT(ypos));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("move"), // event name
@@ -277,10 +277,10 @@ void APIENTRY windowPosCB(NATIVEwindow *window, int xpos, int ypos) {
 void APIENTRY windowSizeCB(NATIVEwindow *window, int w, int h) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("windowResize"));
-    evt->Set(JS_STR("width"),JS_INT(w));
-    evt->Set(JS_STR("height"),JS_INT(h));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("windowResize"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("width"),JS_INT(w));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("height"),JS_INT(h));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("windowResize"), // event name
@@ -293,10 +293,10 @@ void APIENTRY windowSizeCB(NATIVEwindow *window, int w, int h) {
 void APIENTRY windowFramebufferSizeCB(NATIVEwindow *window, int w, int h) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("framebufferResize"));
-    evt->Set(JS_STR("width"),JS_INT(w));
-    evt->Set(JS_STR("height"),JS_INT(h));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("framebufferResize"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("width"),JS_INT(w));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("height"),JS_INT(h));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("framebufferResize"), // event name
@@ -323,8 +323,8 @@ void APIENTRY windowDropCB(NATIVEwindow *window, int count, const char **paths) 
     }
 
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("paths"), pathsArray);
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("paths"), pathsArray);
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("drop"), // event name
@@ -341,7 +341,7 @@ void APIENTRY windowDropCB(NATIVEwindow *window, int count, const char **paths) 
 void APIENTRY windowCloseCB(NATIVEwindow *window) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("quit"), // event name
@@ -354,8 +354,8 @@ void APIENTRY windowCloseCB(NATIVEwindow *window) {
 void APIENTRY windowRefreshCB(NATIVEwindow *window) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("refresh"));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("refresh"));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("refresh"), // event name
@@ -368,9 +368,9 @@ void APIENTRY windowRefreshCB(NATIVEwindow *window) {
 void APIENTRY windowFocusCB(NATIVEwindow *window, int focused) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("focus"));
-    evt->Set(JS_STR("focused"),JS_BOOL((bool)focused));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("focus"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("focused"),JS_BOOL((bool)focused));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("focus"), // event name
@@ -383,9 +383,9 @@ void APIENTRY windowFocusCB(NATIVEwindow *window, int focused) {
 void APIENTRY windowMaximizeCB(NATIVEwindow *window, int maximized) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("maximize"));
-    evt->Set(JS_STR("maximized"),JS_BOOL((bool)maximized));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("maximize"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("maximized"),JS_BOOL((bool)maximized));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("maximize"), // event name
@@ -398,9 +398,9 @@ void APIENTRY windowMaximizeCB(NATIVEwindow *window, int maximized) {
 void APIENTRY windowIconifyCB(NATIVEwindow *window, int iconified) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("minimize"));
-    evt->Set(JS_STR("minimized"),JS_BOOL((bool)iconified));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("minimize"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("minimized"),JS_BOOL((bool)iconified));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("minimize"), // event name
@@ -647,15 +647,15 @@ void APIENTRY keyCB(NATIVEwindow *window, int key, int scancode, int action, int
     int which = key;
     QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
       Local<Object> evt = Nan::New<Object>();
-      evt->Set(JS_STR("type"), JS_STR(&actionNames[action << 3]));
-      evt->Set(JS_STR("ctrlKey"), JS_BOOL(mods & GLFW_MOD_CONTROL));
-      evt->Set(JS_STR("shiftKey"), JS_BOOL(mods & GLFW_MOD_SHIFT));
-      evt->Set(JS_STR("altKey"), JS_BOOL(mods & GLFW_MOD_ALT));
-      evt->Set(JS_STR("metaKey"), JS_BOOL(mods & GLFW_MOD_SUPER));
-      evt->Set(JS_STR("which"), JS_INT(which));
-      evt->Set(JS_STR("keyCode"), JS_INT(key));
-      evt->Set(JS_STR("charCode"), JS_INT(charCode));
-      // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("type"), JS_STR(&actionNames[action << 3]));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("ctrlKey"), JS_BOOL(mods & GLFW_MOD_CONTROL));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("shiftKey"), JS_BOOL(mods & GLFW_MOD_SHIFT));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("altKey"), JS_BOOL(mods & GLFW_MOD_ALT));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("metaKey"), JS_BOOL(mods & GLFW_MOD_SUPER));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("which"), JS_INT(which));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("keyCode"), JS_INT(key));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("charCode"), JS_INT(charCode));
+      // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
       Local<Value> argv[] = {
         JS_STR(&actionNames[action << 3]), // event name
@@ -701,22 +701,22 @@ void APIENTRY cursorPosCB(NATIVEwindow* window, double x, double y) {
 
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("mousemove"));
-    evt->Set(JS_STR("clientX"),JS_NUM(x));
-    evt->Set(JS_STR("clientY"),JS_NUM(y));
-    evt->Set(JS_STR("pageX"),JS_NUM(x));
-    evt->Set(JS_STR("pageY"),JS_NUM(y));
-    evt->Set(JS_STR("offsetX"),JS_NUM(x));
-    evt->Set(JS_STR("offsetY"),JS_NUM(y));
-    evt->Set(JS_STR("screenX"),JS_NUM(x));
-    evt->Set(JS_STR("screenY"),JS_NUM(y));
-    evt->Set(JS_STR("movementX"),JS_NUM(movementX));
-    evt->Set(JS_STR("movementY"),JS_NUM(movementY));
-    evt->Set(JS_STR("ctrlKey"),JS_BOOL(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS));
-    evt->Set(JS_STR("shiftKey"),JS_BOOL(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS));
-    evt->Set(JS_STR("altKey"),JS_BOOL(glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS));
-    evt->Set(JS_STR("metaKey"),JS_BOOL(glfwGetKey(window, GLFW_KEY_LEFT_SUPER) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SUPER) == GLFW_PRESS));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("mousemove"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("clientX"),JS_NUM(x));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("clientY"),JS_NUM(y));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("pageX"),JS_NUM(x));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("pageY"),JS_NUM(y));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("offsetX"),JS_NUM(x));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("offsetY"),JS_NUM(y));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("screenX"),JS_NUM(x));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("screenY"),JS_NUM(y));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("movementX"),JS_NUM(movementX));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("movementY"),JS_NUM(movementY));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("ctrlKey"),JS_BOOL(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("shiftKey"),JS_BOOL(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("altKey"),JS_BOOL(glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("metaKey"),JS_BOOL(glfwGetKey(window, GLFW_KEY_LEFT_SUPER) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SUPER) == GLFW_PRESS));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("mousemove"), // event name
@@ -729,9 +729,9 @@ void APIENTRY cursorPosCB(NATIVEwindow* window, double x, double y) {
 void APIENTRY cursorEnterCB(NATIVEwindow* window, int entered) {
   QueueEvent(window, [=](std::function<void(int, Local<Value> *)> eventHandlerFn) -> void {
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("mouseenter"));
-    evt->Set(JS_STR("entered"),JS_INT(entered));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("mouseenter"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("entered"),JS_INT(entered));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("mouseenter"), // event name
@@ -755,22 +755,22 @@ void APIENTRY mouseButtonCB(NATIVEwindow *window, int button, int action, int mo
 
     {
       Local<Object> evt = Nan::New<Object>();
-      evt->Set(JS_STR("type"),JS_STR(action ? "mousedown" : "mouseup"));
-      evt->Set(JS_STR("button"),JS_INT(localButton));
-      evt->Set(JS_STR("which"),JS_INT(localButton + 1));
-      evt->Set(JS_STR("clientX"),JS_NUM(xpos));
-      evt->Set(JS_STR("clientY"),JS_NUM(ypos));
-      evt->Set(JS_STR("pageX"),JS_NUM(xpos));
-      evt->Set(JS_STR("pageY"),JS_NUM(ypos));
-      evt->Set(JS_STR("offsetX"),JS_NUM(xpos));
-      evt->Set(JS_STR("offsetY"),JS_NUM(ypos));
-      evt->Set(JS_STR("screenX"),JS_NUM(xpos));
-      evt->Set(JS_STR("screenY"),JS_NUM(ypos));
-      evt->Set(JS_STR("shiftKey"),JS_BOOL(mods & GLFW_MOD_SHIFT));
-      evt->Set(JS_STR("ctrlKey"),JS_BOOL(mods & GLFW_MOD_CONTROL));
-      evt->Set(JS_STR("altKey"),JS_BOOL(mods & GLFW_MOD_ALT));
-      evt->Set(JS_STR("metaKey"),JS_BOOL(mods & GLFW_MOD_SUPER));
-      // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR(action ? "mousedown" : "mouseup"));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("button"),JS_INT(localButton));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("which"),JS_INT(localButton + 1));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("clientX"),JS_NUM(xpos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("clientY"),JS_NUM(ypos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("pageX"),JS_NUM(xpos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("pageY"),JS_NUM(ypos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("offsetX"),JS_NUM(xpos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("offsetY"),JS_NUM(ypos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("screenX"),JS_NUM(xpos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("screenY"),JS_NUM(ypos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("shiftKey"),JS_BOOL(mods & GLFW_MOD_SHIFT));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("ctrlKey"),JS_BOOL(mods & GLFW_MOD_CONTROL));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("altKey"),JS_BOOL(mods & GLFW_MOD_ALT));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("metaKey"),JS_BOOL(mods & GLFW_MOD_SUPER));
+      // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
       Local<Value> argv[] = {
         JS_STR(action ? "mousedown" : "mouseup"), // event name
@@ -781,22 +781,22 @@ void APIENTRY mouseButtonCB(NATIVEwindow *window, int button, int action, int mo
 
     if (!action) {
       Local<Object> evt = Nan::New<Object>();
-      evt->Set(JS_STR("type"),JS_STR("click"));
-      evt->Set(JS_STR("button"),JS_INT(localButton));
-      evt->Set(JS_STR("which"),JS_INT(localButton + 1));
-      evt->Set(JS_STR("clientX"),JS_NUM(xpos));
-      evt->Set(JS_STR("clientY"),JS_NUM(ypos));
-      evt->Set(JS_STR("pageX"),JS_NUM(xpos));
-      evt->Set(JS_STR("pageY"),JS_NUM(ypos));
-      evt->Set(JS_STR("offsetX"),JS_NUM(xpos));
-      evt->Set(JS_STR("offsetY"),JS_NUM(ypos));
-      evt->Set(JS_STR("screenX"),JS_NUM(xpos));
-      evt->Set(JS_STR("screenY"),JS_NUM(ypos));
-      evt->Set(JS_STR("shiftKey"),JS_BOOL(mods & GLFW_MOD_SHIFT));
-      evt->Set(JS_STR("ctrlKey"),JS_BOOL(mods & GLFW_MOD_CONTROL));
-      evt->Set(JS_STR("altKey"),JS_BOOL(mods & GLFW_MOD_ALT));
-      evt->Set(JS_STR("metaKey"),JS_BOOL(mods & GLFW_MOD_SUPER));
-      // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("click"));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("button"),JS_INT(localButton));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("which"),JS_INT(localButton + 1));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("clientX"),JS_NUM(xpos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("clientY"),JS_NUM(ypos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("pageX"),JS_NUM(xpos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("pageY"),JS_NUM(ypos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("offsetX"),JS_NUM(xpos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("offsetY"),JS_NUM(ypos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("screenX"),JS_NUM(xpos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("screenY"),JS_NUM(ypos));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("shiftKey"),JS_BOOL(mods & GLFW_MOD_SHIFT));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("ctrlKey"),JS_BOOL(mods & GLFW_MOD_CONTROL));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("altKey"),JS_BOOL(mods & GLFW_MOD_ALT));
+      evt->Set(Nan::GetCurrentContext(), JS_STR("metaKey"),JS_BOOL(mods & GLFW_MOD_SUPER));
+      // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
       Local<Value> argv[] = {
         JS_STR("click"), // event name
@@ -809,7 +809,7 @@ void APIENTRY mouseButtonCB(NATIVEwindow *window, int button, int action, int mo
       uint64_t frequency = glfwGetTimerFrequency();
       double timeDiffSeconds = (double)timeDiffTicks / (double)frequency;
       if (timeDiffSeconds < 0.2) {
-        evt->Set(JS_STR("type"),JS_STR("dblclick"));
+        evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("dblclick"));
 
         Local<Value> argv[] = {
           JS_STR("dblclick"), // event name
@@ -828,14 +828,14 @@ void APIENTRY scrollCB(NATIVEwindow *window, double xoffset, double yoffset) {
     glfwGetCursorPos(window, &xpos, &ypos);
     
     Local<Object> evt = Nan::New<Object>();
-    evt->Set(JS_STR("type"),JS_STR("wheel"));
-    evt->Set(JS_STR("clientX"),JS_NUM(xpos));
-    evt->Set(JS_STR("clientY"),JS_NUM(ypos));
-    evt->Set(JS_STR("deltaX"),JS_NUM(-xoffset*120));
-    evt->Set(JS_STR("deltaY"),JS_NUM(-yoffset*120));
-    evt->Set(JS_STR("deltaZ"),JS_INT(0));
-    evt->Set(JS_STR("deltaMode"),JS_INT(0));
-    // evt->Set(JS_STR("windowHandle"), pointerToArray(window));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("type"),JS_STR("wheel"));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("clientX"),JS_NUM(xpos));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("clientY"),JS_NUM(ypos));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("deltaX"),JS_NUM(-xoffset*120));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("deltaY"),JS_NUM(-yoffset*120));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("deltaZ"),JS_INT(0));
+    evt->Set(Nan::GetCurrentContext(), JS_STR("deltaMode"),JS_INT(0));
+    // evt->Set(Nan::GetCurrentContext(), JS_STR("windowHandle"), pointerToArray(window));
 
     Local<Value> argv[] = {
       JS_STR("wheel"), // event name
@@ -1032,8 +1032,8 @@ NAN_METHOD(GetWindowSize) {
   int w, h;
   GetWindowSize(window, &w, &h);
   Local<Object> result = Nan::New<Object>();
-  result->Set(JS_STR("width"),JS_INT(w));
-  result->Set(JS_STR("height"),JS_INT(h));
+  result->Set(Nan::GetCurrentContext(), JS_STR("width"),JS_INT(w));
+  result->Set(Nan::GetCurrentContext(), JS_STR("height"),JS_INT(h));
   info.GetReturnValue().Set(result);
 }
 
@@ -1053,8 +1053,8 @@ NAN_METHOD(GetWindowPos) {
   glfwGetWindowPos(window, &xpos, &ypos);
 
   Local<Object> result = Nan::New<Object>();
-  result->Set(JS_STR("xpos"),JS_INT(xpos));
-  result->Set(JS_STR("ypos"),JS_INT(ypos));
+  result->Set(Nan::GetCurrentContext(), JS_STR("xpos"),JS_INT(xpos));
+  result->Set(Nan::GetCurrentContext(), JS_STR("ypos"),JS_INT(ypos));
   info.GetReturnValue().Set(result);
 }
 
@@ -1067,8 +1067,8 @@ NAN_METHOD(GetFramebufferSize) {
   int width, height;
   GetFramebufferSize(window, &width, &height);
   Local<Object> result = Nan::New<Object>();
-  result->Set(JS_STR("width"),JS_INT(width));
-  result->Set(JS_STR("height"),JS_INT(height));
+  result->Set(Nan::GetCurrentContext(), JS_STR("width"),JS_INT(width));
+  result->Set(Nan::GetCurrentContext(), JS_STR("height"),JS_INT(height));
   info.GetReturnValue().Set(result);
 }
 
@@ -1380,7 +1380,7 @@ NAN_METHOD(PollEvents) {
 // bindings
 //
 ///////////////////////////////////////////////////////////////////////////////
-#define JS_GLFW_CONSTANT(name) target->Set(JS_STR( #name ), JS_INT(GLFW_ ## name))
+#define JS_GLFW_CONSTANT(name) target->Set(Nan::GetCurrentContext(), JS_STR( #name ), JS_INT(GLFW_ ## name))
 #define JS_GLFW_SET_METHOD(name) Nan::SetMethod(target, #name , glfw::name);
 
 /* Local<Object> makeGlfw() {

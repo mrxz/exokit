@@ -35,7 +35,7 @@ Local<Object> AudioParam::Initialize(Isolate *isolate) {
 NAN_METHOD(AudioParam::New) {
   Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))) {
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))) {
     Local<Object> audioContextObj = Local<Object>::Cast(info[0]);
 
     AudioParam *audioParam = new AudioParam();
@@ -176,7 +176,7 @@ NAN_METHOD(AudioParam::SetValueCurveAtTime) {
     size_t numCurves = curveValue->Length();
     vector<float> curve(numCurves);
     for (size_t i = 0; i < numCurves; i++) {
-      curve[i] = TO_FLOAT(curveValue->Get(i));
+      curve[i] = TO_FLOAT(curveValue->Get(Nan::GetCurrentContext(), i).ToLocalChecked());
     }
     float time = TO_FLOAT(info[1]);
     float duration = TO_FLOAT(info[2]);

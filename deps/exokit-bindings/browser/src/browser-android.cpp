@@ -296,7 +296,7 @@ NAN_GETTER(Browser::TextureGetter) {
   Browser *browser = ObjectWrap::Unwrap<Browser>(info.This());
 
   Local<Object> textureObj = Nan::New<Object>();
-  textureObj->Set(JS_STR("id"), JS_INT(browser->browser->tex));
+  textureObj->Set(Nan::GetCurrentContext(), JS_STR("id"), JS_INT(browser->browser->tex));
   info.GetReturnValue().Set(textureObj);
 }
 

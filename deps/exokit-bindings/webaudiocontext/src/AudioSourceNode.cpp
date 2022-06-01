@@ -31,14 +31,14 @@ void AudioSourceNode::InitializePrototype(Local<ObjectTemplate> proto) {
 NAN_METHOD(AudioSourceNode::New) {
   // Nan::HandleScope scope;
 
-  if (info[1]->IsObject() && JS_OBJ(JS_OBJ(info[1])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))) {
+  if (info[1]->IsObject() && JS_OBJ(JS_OBJ(info[1])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))) {
     Local<Object> audioContextObj = Local<Object>::Cast(info[1]);
 
-    if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLAudioElement"))) {
+    if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLAudioElement"))) {
       Local<Object> htmlAudioElement = Local<Object>::Cast(info[0]);
-      Local<Value> audioValue = htmlAudioElement->Get(JS_STR("audio"));
+      Local<Value> audioValue = htmlAudioElement->Get(Nan::GetCurrentContext(), JS_STR("audio")).ToLocalChecked();
 
-      if (TO_BOOL(audioValue) && audioValue->IsObject() && JS_OBJ(JS_OBJ(audioValue)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("Audio"))) {
+      if (TO_BOOL(audioValue) && audioValue->IsObject() && JS_OBJ(JS_OBJ(audioValue)->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("Audio"))) {
         Audio *audio = ObjectWrap::Unwrap<Audio>(Local<Object>::Cast(audioValue));
 
         AudioSourceNode *audioSourceNode = new AudioSourceNode();
@@ -54,7 +54,7 @@ NAN_METHOD(AudioSourceNode::New) {
       } else {
         Nan::ThrowError("AudioSourceNode: invalid audio element state");
       }
-    } else if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("MicrophoneMediaStream"))) {
+    } else if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("MicrophoneMediaStream"))) {
       AudioSourceNode *audioSourceNode = new AudioSourceNode();
       Local<Object> audioSourceNodeObj = info.This();
       audioSourceNode->Wrap(audioSourceNodeObj);

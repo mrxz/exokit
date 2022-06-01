@@ -28,7 +28,7 @@ Local<Object> PannerNode::Initialize(Isolate *isolate, Local<Value> fakeAudioPar
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
 
   Nan::SetMethod(ctorFn, "setPath", SetPath);
-  ctorFn->Set(JS_STR("FakeAudioParam"), fakeAudioParamCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("FakeAudioParam"), fakeAudioParamCons);
 
   return scope.Escape(ctorFn);
 }
@@ -48,7 +48,7 @@ void PannerNode::InitializePrototype(Local<ObjectTemplate> proto) {
 NAN_METHOD(PannerNode::New) {
   // Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))) {
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))) {
     Local<Object> audioContextObj = Local<Object>::Cast(info[0]);
 
     PannerNode *pannerNode = new PannerNode();
@@ -61,43 +61,43 @@ NAN_METHOD(PannerNode::New) {
     pannerNode->context.Reset(audioContextObj);
     pannerNode->audioNode = labPannerNode;
 
-    Local<Function> fakeAudioParamConstructor = Local<Function>::Cast(JS_OBJ(pannerNodeObj->Get(JS_STR("constructor")))->Get(JS_STR("FakeAudioParam")));
+    Local<Function> fakeAudioParamConstructor = Local<Function>::Cast(JS_OBJ(pannerNodeObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("FakeAudioParam")).ToLocalChecked());
 
     Local<Object> positionXAudioParamObj = fakeAudioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), 0, nullptr).ToLocalChecked();
     FakeAudioParam *positionXAudioParam = ObjectWrap::Unwrap<FakeAudioParam>(positionXAudioParamObj);
     positionXAudioParam->getter = [=]() -> float { return labPannerNode->position().x; };
     positionXAudioParam->setter = [=](float x) -> void { lab::FloatPoint3D position = labPannerNode->position(); labPannerNode->setPosition(x, position.y, position.z); };
-    pannerNodeObj->Set(JS_STR("positionX"), positionXAudioParamObj);
+    pannerNodeObj->Set(Nan::GetCurrentContext(), JS_STR("positionX"), positionXAudioParamObj);
 
     Local<Object> positionYAudioParamObj = fakeAudioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), 0, nullptr).ToLocalChecked();
     FakeAudioParam *positionYAudioParam = ObjectWrap::Unwrap<FakeAudioParam>(positionYAudioParamObj);
     positionYAudioParam->getter = [=]() -> float { return labPannerNode->position().y; };
     positionYAudioParam->setter = [=](float y) -> void { lab::FloatPoint3D position = labPannerNode->position(); labPannerNode->setPosition(position.x, y, position.z); };
-    pannerNodeObj->Set(JS_STR("positionY"), positionYAudioParamObj);
+    pannerNodeObj->Set(Nan::GetCurrentContext(), JS_STR("positionY"), positionYAudioParamObj);
 
     Local<Object> positionZAudioParamObj = fakeAudioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), 0, nullptr).ToLocalChecked();
     FakeAudioParam *positionZAudioParam = ObjectWrap::Unwrap<FakeAudioParam>(positionZAudioParamObj);
     positionZAudioParam->getter = [=]() -> float { return labPannerNode->position().z; };
     positionZAudioParam->setter = [=](float z) -> void { lab::FloatPoint3D position = labPannerNode->position(); labPannerNode->setPosition(position.x, position.y, z); };
-    pannerNodeObj->Set(JS_STR("positionZ"), positionZAudioParamObj);
+    pannerNodeObj->Set(Nan::GetCurrentContext(), JS_STR("positionZ"), positionZAudioParamObj);
 
     Local<Object> orientationXAudioParamObj = fakeAudioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), 0, nullptr).ToLocalChecked();
     FakeAudioParam *orientationXAudioParam = ObjectWrap::Unwrap<FakeAudioParam>(orientationXAudioParamObj);
     orientationXAudioParam->getter = [=]() -> float { return labPannerNode->orientation().x; };
     orientationXAudioParam->setter = [=](float x) -> void { lab::FloatPoint3D orientation = labPannerNode->orientation(); labPannerNode->setOrientation(x, orientation.y, orientation.z); };
-    pannerNodeObj->Set(JS_STR("orientationX"), orientationXAudioParamObj);
+    pannerNodeObj->Set(Nan::GetCurrentContext(), JS_STR("orientationX"), orientationXAudioParamObj);
 
     Local<Object> orientationYAudioParamObj = fakeAudioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), 0, nullptr).ToLocalChecked();
     FakeAudioParam *orientationYAudioParam = ObjectWrap::Unwrap<FakeAudioParam>(orientationYAudioParamObj);
     orientationYAudioParam->getter = [=]() -> float { return labPannerNode->orientation().y; };
     orientationYAudioParam->setter = [=](float y) -> void { lab::FloatPoint3D orientation = labPannerNode->orientation(); labPannerNode->setOrientation(orientation.x, y, orientation.z); };
-    pannerNodeObj->Set(JS_STR("orientationY"), orientationYAudioParamObj);
+    pannerNodeObj->Set(Nan::GetCurrentContext(), JS_STR("orientationY"), orientationYAudioParamObj);
 
     Local<Object> orientationZAudioParamObj = fakeAudioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), 0, nullptr).ToLocalChecked();
     FakeAudioParam *orientationZAudioParam = ObjectWrap::Unwrap<FakeAudioParam>(orientationZAudioParamObj);
     orientationZAudioParam->getter = [=]() -> float { return labPannerNode->orientation().z; };
     orientationZAudioParam->setter = [=](float z) -> void { lab::FloatPoint3D orientation = labPannerNode->orientation(); labPannerNode->setOrientation(orientation.x, orientation.y, z); };
-    pannerNodeObj->Set(JS_STR("orientationZ"), orientationZAudioParamObj);
+    pannerNodeObj->Set(Nan::GetCurrentContext(), JS_STR("orientationZ"), orientationZAudioParamObj);
 
     info.GetReturnValue().Set(pannerNodeObj);
   } else {

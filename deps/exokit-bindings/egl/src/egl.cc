@@ -148,8 +148,8 @@ NAN_METHOD(GetWindowSize) {
   GetWindowSize(window, &width, &height);
 
   Local<Object> result = Nan::New<Object>();
-  result->Set(JS_STR("width"),JS_INT(width));
-  result->Set(JS_STR("height"),JS_INT(height));
+  result->Set(Nan::GetCurrentContext(), JS_STR("width"),JS_INT(width));
+  result->Set(Nan::GetCurrentContext(), JS_STR("height"),JS_INT(height));
   info.GetReturnValue().Set(result);
 }
 
@@ -172,8 +172,8 @@ NAN_METHOD(SetWindowPos) {
 
 NAN_METHOD(GetWindowPos) {
   Local<Object> result = Nan::New<Object>();
-  result->Set(JS_STR("xpos"),JS_INT(0));
-  result->Set(JS_STR("ypos"),JS_INT(0));
+  result->Set(Nan::GetCurrentContext(), JS_STR("xpos"),JS_INT(0));
+  result->Set(Nan::GetCurrentContext(), JS_STR("ypos"),JS_INT(0));
   info.GetReturnValue().Set(result);
 }
 
@@ -189,8 +189,8 @@ NAN_METHOD(GetFramebufferSize) {
   GetFramebufferSize(window, &width, &height);
 
   Local<Object> result = Nan::New<Object>();
-  result->Set(JS_STR("width"),JS_INT(width));
-  result->Set(JS_STR("height"),JS_INT(height));
+  result->Set(Nan::GetCurrentContext(), JS_STR("width"),JS_INT(width));
+  result->Set(Nan::GetCurrentContext(), JS_STR("height"),JS_INT(height));
   info.GetReturnValue().Set(result);
 }
 

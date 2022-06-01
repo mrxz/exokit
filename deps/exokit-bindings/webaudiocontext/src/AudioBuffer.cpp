@@ -30,6 +30,7 @@ Local<Object> AudioBuffer::Initialize(Isolate *isolate) {
 }
 NAN_METHOD(AudioBuffer::New) {
   // Nan::HandleScope scope;
+  Local<Context> context = Nan::GetCurrentContext();
 
   if (info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber()) {
     uint32_t numOfChannels = TO_UINT32(info[0]);
@@ -43,7 +44,7 @@ NAN_METHOD(AudioBuffer::New) {
       for (size_t i = 0; i < numOfChannels; i++) {
         Local<ArrayBuffer> arrayBuffer = ArrayBuffer::New(Isolate::GetCurrent(), length * sizeof(float));
         Local<Float32Array> float32Array = Float32Array::New(arrayBuffer, 0, length);
-        buffers->Set(i, float32Array);
+        buffers->Set(context, i, float32Array);
       }
     }
 
@@ -73,7 +74,7 @@ NAN_GETTER(AudioBuffer::Length) {
   AudioBuffer *audioBuffer = ObjectWrap::Unwrap<AudioBuffer>(info.This());
   Local<Array> buffers = Nan::New(audioBuffer->buffers);
   if (buffers->Length() > 0) {
-    Local<Float32Array> firstBuffer = Local<Float32Array>::Cast(buffers->Get(0));
+    Local<Float32Array> firstBuffer = Local<Float32Array>::Cast(buffers->Get(Nan::GetCurrentContext(), 0).ToLocalChecked());
     uint32_t numFrames = firstBuffer->Length();
 
     info.GetReturnValue().Set(JS_INT(numFrames));
@@ -87,7 +88,7 @@ NAN_GETTER(AudioBuffer::Duration) {
   AudioBuffer *audioBuffer = ObjectWrap::Unwrap<AudioBuffer>(info.This());
   Local<Array> buffers = Nan::New(audioBuffer->buffers);
   if (buffers->Length() > 0) {
-    Local<Float32Array> firstBuffer = Local<Float32Array>::Cast(buffers->Get(0));
+    Local<Float32Array> firstBuffer = Local<Float32Array>::Cast(buffers->Get(Nan::GetCurrentContext(), 0).ToLocalChecked());
     double numFrames = firstBuffer->Length();
     double sampleRate = audioBuffer->sampleRate;
     double duration = numFrames / sampleRate;
@@ -113,7 +114,7 @@ NAN_METHOD(AudioBuffer::GetChannelData) {
 
     AudioBuffer *audioBuffer = ObjectWrap::Unwrap<AudioBuffer>(info.This());
     Local<Array> buffers = Nan::New(audioBuffer->buffers);
-    Local<Value> channelData = buffers->Get(channelIndex);
+    Local<Value> channelData = buffers->Get(Nan::GetCurrentContext(), channelIndex).ToLocalChecked();
 
     info.GetReturnValue().Set(channelData);
   } else {
@@ -122,6 +123,7 @@ NAN_METHOD(AudioBuffer::GetChannelData) {
 }
 NAN_METHOD(AudioBuffer::CopyFromChannel) {
   // Nan::HandleScope scope;
+  Local<Context> context = Nan::GetCurrentContext();
 
   if (info[0]->IsFloat32Array() && info[1]->IsNumber()) {
     Local<Float32Array> destinationFloat32Array = Local<Float32Array>::Cast(info[0]);
@@ -129,14 +131,14 @@ NAN_METHOD(AudioBuffer::CopyFromChannel) {
 
     AudioBuffer *audioBuffer = ObjectWrap::Unwrap<AudioBuffer>(info.This());
     Local<Array> buffers = Nan::New(audioBuffer->buffers);
-    Local<Value> channelData = buffers->Get(channelIndex);
+    Local<Value> channelData = buffers->Get(context, channelIndex).ToLocalChecked();
 
     if (TO_BOOL(channelData)) {
       Local<Float32Array> channelDataFloat32Array = Local<Float32Array>::Cast(channelData);
       uint32_t offset = std::min<uint32_t>(info[2]->IsNumber() ? TO_UINT32(info[2]) : 0, channelDataFloat32Array->Length());
       size_t copyLength = std::min<size_t>(channelDataFloat32Array->Length() - offset, destinationFloat32Array->Length());
       for (size_t i = 0; i < copyLength; i++) {
-        destinationFloat32Array->Set(i, channelDataFloat32Array->Get(offset + i));
+        destinationFloat32Array->Set(context, i, channelDataFloat32Array->Get(context, offset + i).ToLocalChecked());
       }
     } else {
       Nan::ThrowError("AudioBuffer:CopyFromChannel: invalid channel index");
@@ -147,6 +149,7 @@ NAN_METHOD(AudioBuffer::CopyFromChannel) {
 }
 NAN_METHOD(AudioBuffer::CopyToChannel) {
   // Nan::HandleScope scope;
+  Local<Context> context = Nan::GetCurrentContext();
 
   if (info[0]->IsFloat32Array() && info[1]->IsNumber()) {
     Local<Float32Array> sourceFloat32Array = Local<Float32Array>::Cast(info[0]);
@@ -154,14 +157,14 @@ NAN_METHOD(AudioBuffer::CopyToChannel) {
 
     AudioBuffer *audioBuffer = ObjectWrap::Unwrap<AudioBuffer>(info.This());
     Local<Array> buffers = Nan::New(audioBuffer->buffers);
-    Local<Value> channelData = buffers->Get(channelIndex);
+    Local<Value> channelData = buffers->Get(context, channelIndex).ToLocalChecked();
 
     if (TO_BOOL(channelData)) {
       Local<Float32Array> channelDataFloat32Array = Local<Float32Array>::Cast(channelData);
       uint32_t offset = std::min<uint32_t>(info[2]->IsNumber() ? TO_UINT32(info[2]) : 0, channelDataFloat32Array->Length());
       size_t copyLength = std::min<size_t>(channelDataFloat32Array->Length() - offset, sourceFloat32Array->Length());
       for (size_t i = 0; i < copyLength; i++) {
-        channelDataFloat32Array->Set(offset + i, sourceFloat32Array->Get(i));
+        channelDataFloat32Array->Set(context, offset + i, sourceFloat32Array->Get(context, i).ToLocalChecked());
       }
     } else {
       Nan::ThrowError("AudioBuffer:CopyToChannel: invalid channel index");
@@ -228,7 +231,8 @@ void AudioBuffer::Load(Local<ArrayBuffer> arrayBuffer, size_t byteOffset, size_t
 
 void AudioBuffer::ProcessLoadInMainThread(AudioBuffer *audioBuffer) {
   Nan::HandleScope scope;
-  
+  Local<Context> context = Nan::GetCurrentContext();
+
   uint32_t numChannels = audioBuffer->audioBus->numberOfChannels();
   uint32_t numFrames = audioBuffer->audioBus->channel(0)->length();
   Local<Array> buffers = Nan::New<Array>(numChannels);
@@ -239,7 +243,7 @@ void AudioBuffer::ProcessLoadInMainThread(AudioBuffer *audioBuffer) {
     Local<ArrayBuffer> sourceArrayBuffer = ArrayBuffer::New(Isolate::GetCurrent(), numFrames * sizeof(float));
     memcpy(sourceArrayBuffer->GetContents().Data(), source, sourceArrayBuffer->ByteLength());
     Local<Float32Array> sourceFloat32Array = Float32Array::New(sourceArrayBuffer, 0, numFrames);
-    buffers->Set(i, sourceFloat32Array);
+    buffers->Set(context, i, sourceFloat32Array);
   }
   audioBuffer->buffers.Reset(buffers);
 
@@ -280,7 +284,7 @@ Local<Object> AudioBufferSourceNode::Initialize(Isolate *isolate, Local<Value> a
 
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
   
-  ctorFn->Set(JS_STR("AudioParam"), audioParamCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioParam"), audioParamCons);
 
   return scope.Escape(ctorFn);
 }
@@ -292,8 +296,9 @@ void AudioBufferSourceNode::InitializePrototype(Local<ObjectTemplate> proto) {
 }
 NAN_METHOD(AudioBufferSourceNode::New) {
   // Nan::HandleScope scope;
+  Local<Context> context = Nan::GetCurrentContext();
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))) {
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))) {
     Local<Object> audioContextObj = Local<Object>::Cast(info[0]);
     AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
@@ -302,14 +307,14 @@ NAN_METHOD(AudioBufferSourceNode::New) {
     audioBufferSourceNode->Wrap(audioBufferSourceNodeObj);
     audioBufferSourceNode->context.Reset(audioContextObj);
     
-    Local<Function> audioParamConstructor = Local<Function>::Cast(JS_OBJ(audioBufferSourceNodeObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioParam")));
+    Local<Function> audioParamConstructor = Local<Function>::Cast(JS_OBJ(audioBufferSourceNodeObj->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("AudioParam")).ToLocalChecked());
     Local<Value> args[] = {
       audioContextObj,
     };
     Local<Object> playbackRateAudioParamObj = audioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(args)/sizeof(args[0]), args).ToLocalChecked();
     AudioParam *playbackRateAudioParam = ObjectWrap::Unwrap<AudioParam>(playbackRateAudioParamObj);
     playbackRateAudioParam->audioParam = (*(shared_ptr<lab::FinishableSourceNode> *)(&audioBufferSourceNode->audioNode))->playbackRate();
-    audioBufferSourceNodeObj->Set(JS_STR("playbackRate"), playbackRateAudioParamObj);
+    audioBufferSourceNodeObj->Set(context, JS_STR("playbackRate"), playbackRateAudioParamObj);
 
     info.GetReturnValue().Set(audioBufferSourceNodeObj);
   } else {
@@ -337,24 +342,25 @@ NAN_GETTER(AudioBufferSourceNode::BufferGetter) {
 }
 NAN_SETTER(AudioBufferSourceNode::BufferSetter) {
   // Nan::HandleScope scope;
+  Local<Context> context = Nan::GetCurrentContext();
 
   AudioBufferSourceNode *audioBufferSourceNode = ObjectWrap::Unwrap<AudioBufferSourceNode>(info.This());
   Local<Object> audioContextObj = Nan::New(audioBufferSourceNode->context);
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
   lab::FinishableSourceNode *audioNode = (lab::FinishableSourceNode *)audioBufferSourceNode->audioNode.get();
 
-  if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioBuffer"))) {
+  if (value->IsObject() && JS_OBJ(JS_OBJ(value)->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioBuffer"))) {
     Local<Object> audioBufferObj = Local<Object>::Cast(value);
     audioBufferSourceNode->buffer.Reset(audioBufferObj);
 
     AudioBuffer *audioBuffer = ObjectWrap::Unwrap<AudioBuffer>(audioBufferObj);
     Local<Array> buffers = Nan::New(audioBuffer->buffers);
     size_t numChannels = buffers->Length();
-    size_t numFrames = numChannels > 0 ? Local<Float32Array>::Cast(buffers->Get(0))->Length() : 0;
+    size_t numFrames = numChannels > 0 ? Local<Float32Array>::Cast(buffers->Get(context, 0).ToLocalChecked())->Length() : 0;
 
     unique_ptr<float *[]> frames(new float*[numChannels]);
     for (size_t i = 0; i < numChannels; i++) {
-      Local<Float32Array> bufferFramesFloat32Array = Local<Float32Array>::Cast(buffers->Get(i));
+      Local<Float32Array> bufferFramesFloat32Array = Local<Float32Array>::Cast(buffers->Get(context, i).ToLocalChecked());
       size_t numBufferFrames = bufferFramesFloat32Array->Length();
       Local<ArrayBuffer> bufferFramesArrayBuffer = bufferFramesFloat32Array->Buffer();
       frames[i] = (float *)((unsigned char *)bufferFramesArrayBuffer->GetContents().Data() + bufferFramesFloat32Array->ByteOffset());

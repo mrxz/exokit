@@ -35,7 +35,7 @@ void MediaStreamTrack::InitializePrototype(Local<ObjectTemplate> proto) {
 NAN_METHOD(MediaStreamTrack::New) {
   // Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("MicrophoneMediaStream"))) {
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("MicrophoneMediaStream"))) {
     Local<Object> microphoneMediaStreamObj = Local<Object>::Cast(info[0]);
     MicrophoneMediaStream *microphoneMediaStream = ObjectWrap::Unwrap<MicrophoneMediaStream>(microphoneMediaStreamObj);
     

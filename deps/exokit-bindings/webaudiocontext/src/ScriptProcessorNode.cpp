@@ -57,7 +57,7 @@ NAN_GETTER(AudioProcessingEvent::NumberOfInputChannelsGetter) {
 
   AudioProcessingEvent *audioProcessingEvent = ObjectWrap::Unwrap<AudioProcessingEvent>(info.This());
   Local<Object> inputBufferObj = Nan::New(audioProcessingEvent->inputBuffer);
-  Local<Value> numberOfChannels = inputBufferObj->Get(JS_STR("numberOfChannels"));
+  Local<Value> numberOfChannels = inputBufferObj->Get(Nan::GetCurrentContext(), JS_STR("numberOfChannels")).ToLocalChecked();
   info.GetReturnValue().Set(numberOfChannels);
 }
 NAN_GETTER(AudioProcessingEvent::NumberOfOutputChannelsGetter) {
@@ -65,7 +65,7 @@ NAN_GETTER(AudioProcessingEvent::NumberOfOutputChannelsGetter) {
 
   AudioProcessingEvent *audioProcessingEvent = ObjectWrap::Unwrap<AudioProcessingEvent>(info.This());
   Local<Object> outpuctBufferObj = Nan::New(audioProcessingEvent->outputBuffer);
-  Local<Value> numberOfChannels = outpuctBufferObj->Get(JS_STR("numberOfChannels"));
+  Local<Value> numberOfChannels = outpuctBufferObj->Get(Nan::GetCurrentContext(), JS_STR("numberOfChannels")).ToLocalChecked();
   info.GetReturnValue().Set(numberOfChannels);
 }
 
@@ -91,8 +91,8 @@ Local<Object> ScriptProcessorNode::Initialize(Isolate *isolate, Local<Value> aud
 
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
 
-  ctorFn->Set(JS_STR("AudioBuffer"), audioBufferCons);
-  ctorFn->Set(JS_STR("AudioProcessingEvent"), audioProcessingEventCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioBuffer"), audioBufferCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioProcessingEvent"), audioProcessingEventCons);
 
   return scope.Escape(ctorFn);
 }
@@ -104,7 +104,7 @@ NAN_METHOD(ScriptProcessorNode::New) {
 
   if (
     info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsNumber() &&
-    info[3]->IsObject() && JS_OBJ(JS_OBJ(info[3])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))
+    info[3]->IsObject() && JS_OBJ(JS_OBJ(info[3])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))
   ) {
     uint32_t bufferSize = TO_UINT32(info[0]);
     uint32_t numberOfInputChannels = TO_UINT32(info[1]);
@@ -123,9 +123,9 @@ NAN_METHOD(ScriptProcessorNode::New) {
       });
       scriptProcessorNode->audioNode.reset(labScriptProcessorNode);
 
-      Local<Function> audioBufferConstructor = Local<Function>::Cast(JS_OBJ(scriptProcessorNodeObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioBuffer")));
+      Local<Function> audioBufferConstructor = Local<Function>::Cast(JS_OBJ(scriptProcessorNodeObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioBuffer")).ToLocalChecked());
       scriptProcessorNode->audioBufferConstructor.Reset(audioBufferConstructor);
-      Local<Function> audioProcessingEventConstructor = Local<Function>::Cast(JS_OBJ(scriptProcessorNodeObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioProcessingEvent")));
+      Local<Function> audioProcessingEventConstructor = Local<Function>::Cast(JS_OBJ(scriptProcessorNodeObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioProcessingEvent")).ToLocalChecked());
       scriptProcessorNode->audioProcessingEventConstructor.Reset(audioProcessingEventConstructor);
 
       info.GetReturnValue().Set(scriptProcessorNodeObj);
@@ -186,7 +186,7 @@ void ScriptProcessorNode::ProcessInMainThread(ScriptProcessorNode *self) {
   size_t numOutputAudioNodes = outputAudioNodes->Length();
   bool connectedOutput = false;
   for (size_t i = 0; i < numOutputAudioNodes; i++) {
-    if (TO_BOOL(outputAudioNodes->Get(i))) {
+    if (TO_BOOL(outputAudioNodes->Get(Nan::GetCurrentContext(), i).ToLocalChecked())) {
       connectedOutput = true;
       break;
     }
@@ -203,7 +203,7 @@ void ScriptProcessorNode::ProcessInMainThread(ScriptProcessorNode *self) {
       const float *source = sources[i].data();
       Local<ArrayBuffer> sourceArrayBuffer = ArrayBuffer::New(Isolate::GetCurrent(), (void *)source, framesToProcess * sizeof(float));
       Local<Float32Array> sourceFloat32Array = Float32Array::New(sourceArrayBuffer, 0, framesToProcess);
-      sourcesArray->Set(i, sourceFloat32Array);
+      sourcesArray->Set(Nan::GetCurrentContext(), i, sourceFloat32Array);
     }
     Local<Function> audioBufferConstructorFn = Nan::New(self->audioBufferConstructor);
     Local<Value> argv1[] = {
@@ -219,7 +219,7 @@ void ScriptProcessorNode::ProcessInMainThread(ScriptProcessorNode *self) {
       float *destination = destinations[i].data();
       Local<ArrayBuffer> destinationArrayBuffer = ArrayBuffer::New(Isolate::GetCurrent(), destination, framesToProcess * sizeof(float));
       Local<Float32Array> destinationFloat32Array = Float32Array::New(destinationArrayBuffer, 0, framesToProcess);
-      destinationsArray->Set(i, destinationFloat32Array);
+      destinationsArray->Set(Nan::GetCurrentContext(), i, destinationFloat32Array);
     }
     Local<Value> argv2[] = {
       JS_INT((uint32_t)sources.size()),
@@ -243,12 +243,12 @@ void ScriptProcessorNode::ProcessInMainThread(ScriptProcessorNode *self) {
     onAudioProcessLocal->Call(Isolate::GetCurrent()->GetCurrentContext(), Nan::Null(), sizeof(argv4)/sizeof(argv4[0]), argv4);
 
     for (size_t i = 0; i < sourcesArray->Length(); i++) {
-      Local<Float32Array> sourceFloat32Array = Local<Float32Array>::Cast(sourcesArray->Get(i));
-      sourceFloat32Array->Buffer()->Neuter();
+      Local<Float32Array> sourceFloat32Array = Local<Float32Array>::Cast(sourcesArray->Get(Nan::GetCurrentContext(), i).ToLocalChecked());
+      sourceFloat32Array->Buffer()->Detach();
     }
     for (size_t i = 0; i < destinationsArray->Length(); i++) {
-      Local<Float32Array> destinationFloat32Array = Local<Float32Array>::Cast(destinationsArray->Get(i));
-      destinationFloat32Array->Buffer()->Neuter();
+      Local<Float32Array> destinationFloat32Array = Local<Float32Array>::Cast(destinationsArray->Get(Nan::GetCurrentContext(), i).ToLocalChecked());
+      destinationFloat32Array->Buffer()->Detach();
     }
   } else {
     for (size_t i = 0; i < sources.size(); i++) {

@@ -49,7 +49,7 @@ NAN_METHOD(AudioNode::Connect) {
   Nan::HandleScope scope;
 
   if (info[0]->IsObject()) {
-    Local<Value> constructorName = JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"));
+    Local<Value> constructorName = JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked();
 
     if (
       constructorName->StrictEquals(JS_STR("AudioSourceNode")) ||
@@ -85,8 +85,8 @@ NAN_METHOD(AudioNode::Connect) {
         return;
       } */
 
-      Nan::New(srcAudioNode->outputAudioNodes)->Set(outputIndex, dstAudioNodeObj);
-      Nan::New(dstAudioNode->inputAudioNodes)->Set(inputIndex, srcAudioNodeObj);
+      Nan::New(srcAudioNode->outputAudioNodes)->Set(Nan::GetCurrentContext(), outputIndex, dstAudioNodeObj);
+      Nan::New(dstAudioNode->inputAudioNodes)->Set(Nan::GetCurrentContext(), inputIndex, srcAudioNodeObj);
 
       info.GetReturnValue().Set(info[0]);
     } else {
@@ -124,29 +124,29 @@ NAN_METHOD(AudioNode::Disconnect) {
     size_t numOutputAudioNodes = outputAudioNodes->Length();
     size_t numInputAudioNodes = inputAudioNodes->Length();
     for (size_t i = 0; i < numOutputAudioNodes; i++) {
-      Local<Value> outputAudioNode = outputAudioNodes->Get(i);
+      Local<Value> outputAudioNode = outputAudioNodes->Get(Nan::GetCurrentContext(), i).ToLocalChecked();
 
       if (TO_BOOL(outputAudioNode)) {
         Local<Object> outputAudioNodeObj = Local<Object>::Cast(outputAudioNode);
         AudioNode *outputAudioNode = ObjectWrap::Unwrap<AudioNode>(outputAudioNodeObj);
 
         for (size_t j = 0; j < numInputAudioNodes; j++) {
-          Local<Value> inputAudioNode = inputAudioNodes->Get(j);
+          Local<Value> inputAudioNode = inputAudioNodes->Get(Nan::GetCurrentContext(), j).ToLocalChecked();
 
           if (TO_BOOL(inputAudioNode)) {
             Local<Object> inputAudioNodeObj = Local<Object>::Cast(inputAudioNode);
             AudioNode *inputAudioNode = ObjectWrap::Unwrap<AudioNode>(inputAudioNodeObj);
             if (inputAudioNode == srcAudioNode) {
-              inputAudioNodes->Set(j, Nan::Null());
+              inputAudioNodes->Set(Nan::GetCurrentContext(), j, Nan::Null());
             }
           }
         }
-        outputAudioNodes->Set(i, Nan::Null());
+        outputAudioNodes->Set(Nan::GetCurrentContext(), i, Nan::Null());
       }
     }
   } else {
     if (info[0]->IsObject()) {
-      Local<Value> constructorName = JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"));
+      Local<Value> constructorName = JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked();
 
       if (
         constructorName->StrictEquals(JS_STR("AudioSourceNode")) ||
@@ -184,7 +184,7 @@ NAN_METHOD(AudioNode::Disconnect) {
         size_t numOutputAudioNodes = outputAudioNodes->Length();
         size_t numInputAudioNodes = inputAudioNodes->Length();
         for (size_t i = 0; i < numOutputAudioNodes; i++) {
-          Local<Value> outputAudioNode = outputAudioNodes->Get(i);
+          Local<Value> outputAudioNode = outputAudioNodes->Get(Nan::GetCurrentContext(), i).ToLocalChecked();
 
           if (TO_BOOL(outputAudioNode)) {
             Local<Object> outputAudioNodeObj = Local<Object>::Cast(outputAudioNode);
@@ -192,18 +192,18 @@ NAN_METHOD(AudioNode::Disconnect) {
 
             if (outputAudioNode == dstAudioNode) {
               for (size_t j = 0; j < numInputAudioNodes; j++) {
-                Local<Value> inputAudioNode = inputAudioNodes->Get(j);
+                Local<Value> inputAudioNode = inputAudioNodes->Get(Nan::GetCurrentContext(), j).ToLocalChecked();
 
                 if (TO_BOOL(inputAudioNode)) {
                   Local<Object> inputAudioNodeObj = Local<Object>::Cast(inputAudioNode);
                   AudioNode *inputAudioNode = ObjectWrap::Unwrap<AudioNode>(inputAudioNodeObj);
                   
                   if (inputAudioNode == srcAudioNode) {
-                    inputAudioNodes->Set(j, Nan::Null());
+                    inputAudioNodes->Set(Nan::GetCurrentContext(), j, Nan::Null());
                   }
                 }
               }
-              outputAudioNodes->Set(i, Nan::Null());
+              outputAudioNodes->Set(Nan::GetCurrentContext(), i, Nan::Null());
             }
           }
         }

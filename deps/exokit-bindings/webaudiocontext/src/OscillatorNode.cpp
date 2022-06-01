@@ -21,7 +21,7 @@ Local<Object> OscillatorNode::Initialize(Isolate *isolate, Local<Value> audioPar
   
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
   
-  ctorFn->Set(JS_STR("AudioParam"), audioParamCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioParam"), audioParamCons);
 
   return scope.Escape(ctorFn);
 }
@@ -34,7 +34,7 @@ void OscillatorNode::InitializePrototype(Local<ObjectTemplate> proto) {
 NAN_METHOD(OscillatorNode::New) {
   Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))) {
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))) {
     Local<Object> audioContextObj = Local<Object>::Cast(info[0]);
 
     OscillatorNode *oscillatorNode = new OscillatorNode();
@@ -46,7 +46,7 @@ NAN_METHOD(OscillatorNode::New) {
 
     oscillatorNode->context.Reset(audioContextObj);
 
-    Local<Function> audioParamConstructor = Local<Function>::Cast(JS_OBJ(oscillatorNodeObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioParam")));
+    Local<Function> audioParamConstructor = Local<Function>::Cast(JS_OBJ(oscillatorNodeObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioParam")).ToLocalChecked());
     Local<Value> args[] = {
       audioContextObj,
     };
@@ -54,12 +54,12 @@ NAN_METHOD(OscillatorNode::New) {
     Local<Object> frequencyAudioParamObj = audioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(args)/sizeof(args[0]), args).ToLocalChecked();
     AudioParam *frequencyAudioParam = ObjectWrap::Unwrap<AudioParam>(frequencyAudioParamObj);
     frequencyAudioParam->audioParam = (*(shared_ptr<lab::OscillatorNode> *)(&oscillatorNode->audioNode))->frequency();
-    oscillatorNodeObj->Set(JS_STR("frequency"), frequencyAudioParamObj);
+    oscillatorNodeObj->Set(Nan::GetCurrentContext(), JS_STR("frequency"), frequencyAudioParamObj);
 
     Local<Object> detuneAudioParamObj = audioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(args)/sizeof(args[0]), args).ToLocalChecked();
     AudioParam *detuneAudioParam = ObjectWrap::Unwrap<AudioParam>(detuneAudioParamObj);
     detuneAudioParam->audioParam = (*(shared_ptr<lab::OscillatorNode> *)(&oscillatorNode->audioNode))->detune();
-    oscillatorNodeObj->Set(JS_STR("detune"), detuneAudioParamObj);
+    oscillatorNodeObj->Set(Nan::GetCurrentContext(), JS_STR("detune"), detuneAudioParamObj);
 
     info.GetReturnValue().Set(oscillatorNodeObj);
   } else {

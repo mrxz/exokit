@@ -73,21 +73,21 @@ Local<Object> AudioContext::Initialize(Isolate *isolate, Local<Value> audioListe
 
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
 
-  ctorFn->Set(JS_STR("AudioListener"), audioListenerCons);
-  ctorFn->Set(JS_STR("AudioSourceNode"), audioSourceNodeCons);
-  ctorFn->Set(JS_STR("AudioDestinationNode"), audioDestinationNodeCons);
-  ctorFn->Set(JS_STR("GainNode"), gainNodeCons);
-  ctorFn->Set(JS_STR("AnalyserNode"), analyserNodeCons);
-  ctorFn->Set(JS_STR("PannerNode"), pannerNodeCons);
-  ctorFn->Set(JS_STR("StereoPannerNode"), stereoPannerNodeCons);
-  ctorFn->Set(JS_STR("OscillatorNode"), oscillatorNodeCons);
-  ctorFn->Set(JS_STR("AudioBuffer"), audioBufferCons);
-  ctorFn->Set(JS_STR("AudioBufferSourceNode"), audioBufferSourceNodeCons);
-  ctorFn->Set(JS_STR("AudioProcessingEvent"), audioProcessingEventCons);
-  ctorFn->Set(JS_STR("ScriptProcessorNode"), scriptProcessorNodeCons);
-  ctorFn->Set(JS_STR("MediaStreamTrack"), mediaStreamTrackCons);
-  ctorFn->Set(JS_STR("MicrophoneMediaStream"), microphoneMediaStreamCons);
-  ctorFn->Set(JS_STR("Destroy"), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(Destroy)).ToLocalChecked());
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioListener"), audioListenerCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioSourceNode"), audioSourceNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioDestinationNode"), audioDestinationNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("GainNode"), gainNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AnalyserNode"), analyserNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("PannerNode"), pannerNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("StereoPannerNode"), stereoPannerNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("OscillatorNode"), oscillatorNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioBuffer"), audioBufferCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioBufferSourceNode"), audioBufferSourceNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioProcessingEvent"), audioProcessingEventCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("ScriptProcessorNode"), scriptProcessorNodeCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("MediaStreamTrack"), mediaStreamTrackCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("MicrophoneMediaStream"), microphoneMediaStreamCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("Destroy"), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(Destroy)).ToLocalChecked());
 
   return scope.Escape(ctorFn);
 }
@@ -226,26 +226,26 @@ void AudioContext::Close() {
 
 NAN_METHOD(AudioContext::New) {
   Local<Object> options = info[0]->IsObject() ? Local<Object>::Cast(info[0]) : Nan::New<Object>();
-  Local<Value> sampleRateValue = options->Get(JS_STR("sampleRate"));
+  Local<Value> sampleRateValue = options->Get(Nan::GetCurrentContext(), JS_STR("sampleRate")).ToLocalChecked();
   float sampleRate = sampleRateValue->IsNumber() ? TO_DOUBLE(sampleRateValue) : lab::DefaultSampleRate;
 
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = new AudioContext(sampleRate);
   audioContext->Wrap(audioContextObj);
 
-  Local<Function> audioDestinationNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioDestinationNode")));
+  Local<Function> audioDestinationNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioDestinationNode")).ToLocalChecked());
   Local<Value> argv1[] = {
     audioContextObj,
   };
   Local<Object> audioDestinationNodeObj = audioDestinationNodeConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv1)/sizeof(argv1[0]), argv1).ToLocalChecked();
-  audioContextObj->Set(JS_STR("destination"), audioDestinationNodeObj);
+  audioContextObj->Set(Nan::GetCurrentContext(), JS_STR("destination"), audioDestinationNodeObj);
 
-  Local<Function> audioListenerConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioListener")));
+  Local<Function> audioListenerConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioListener")).ToLocalChecked());
   Local<Value> argv2[] = {
     audioContextObj,
   };
   Local<Object> audioListenerObj = audioListenerConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv2)/sizeof(argv2[0]), argv2).ToLocalChecked();
-  audioContextObj->Set(JS_STR("listener"), audioListenerObj);
+  audioContextObj->Set(Nan::GetCurrentContext(), JS_STR("listener"), audioListenerObj);
 
   info.GetReturnValue().Set(audioContextObj);
 }
@@ -253,13 +253,13 @@ NAN_METHOD(AudioContext::New) {
 NAN_METHOD(AudioContext::CreateMediaElementSource) {
   // Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLAudioElement"))) {
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLAudioElement"))) {
     Local<Object> htmlAudioElement = Local<Object>::Cast(info[0]);
 
     Local<Object> audioContextObj = info.This();
     AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-    Local<Function> audioSourceNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioSourceNode")));
+    Local<Function> audioSourceNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioSourceNode")).ToLocalChecked());
     Local<Object> audioNodeObj = audioContext->CreateMediaElementSource(audioSourceNodeConstructor, htmlAudioElement, audioContextObj);
 
     info.GetReturnValue().Set(audioNodeObj);
@@ -271,13 +271,13 @@ NAN_METHOD(AudioContext::CreateMediaElementSource) {
 NAN_METHOD(AudioContext::CreateMediaStreamSource) {
   // Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("MicrophoneMediaStream"))) {
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("MicrophoneMediaStream"))) {
     Local<Object> microphoneMediaStream = Local<Object>::Cast(info[0]);
 
     Local<Object> audioContextObj = info.This();
     AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-    Local<Function> audioSourceNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioSourceNode")));
+    Local<Function> audioSourceNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioSourceNode")).ToLocalChecked());
     Local<Object> audioNodeObj = audioContext->CreateMediaStreamSource(audioSourceNodeConstructor, microphoneMediaStream, audioContextObj);
 
     info.GetReturnValue().Set(audioNodeObj);
@@ -306,7 +306,7 @@ NAN_METHOD(AudioContext::CreateGain) {
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-  Local<Function> gainNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("GainNode")));
+  Local<Function> gainNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("GainNode")).ToLocalChecked());
   Local<Object> gainNodeObj = audioContext->CreateGain(gainNodeConstructor, audioContextObj);
 
   info.GetReturnValue().Set(gainNodeObj);
@@ -318,7 +318,7 @@ NAN_METHOD(AudioContext::CreateAnalyser) {
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-  Local<Function> analyserNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AnalyserNode")));
+  Local<Function> analyserNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AnalyserNode")).ToLocalChecked());
   Local<Object> analyserNodeObj = audioContext->CreateAnalyser(analyserNodeConstructor, audioContextObj);
 
   info.GetReturnValue().Set(analyserNodeObj);
@@ -330,7 +330,7 @@ NAN_METHOD(AudioContext::CreatePanner) {
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-  Local<Function> pannerNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("PannerNode")));
+  Local<Function> pannerNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("PannerNode")).ToLocalChecked());
   Local<Object> pannerNodeObj = audioContext->CreatePanner(pannerNodeConstructor, audioContextObj);
 
   info.GetReturnValue().Set(pannerNodeObj);
@@ -342,7 +342,7 @@ NAN_METHOD(AudioContext::CreateStereoPanner) {
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-  Local<Function> stereoPannerNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("StereoPannerNode")));
+  Local<Function> stereoPannerNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("StereoPannerNode")).ToLocalChecked());
   Local<Object> stereoPannerNodeObj = audioContext->CreateStereoPanner(stereoPannerNodeConstructor, audioContextObj);
 
   info.GetReturnValue().Set(stereoPannerNodeObj);
@@ -354,7 +354,7 @@ NAN_METHOD(AudioContext::CreateOscillator) {
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-  Local<Function> oscillatorNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("OscillatorNode")));
+  Local<Function> oscillatorNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("OscillatorNode")).ToLocalChecked());
   Local<Object> oscillatorNodeObj = audioContext->CreateOscillator(oscillatorNodeConstructor, audioContextObj);
 
   info.GetReturnValue().Set(oscillatorNodeObj);
@@ -371,7 +371,7 @@ NAN_METHOD(AudioContext::CreateBuffer) {
     Local<Object> audioContextObj = info.This();
     AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-    Local<Function> audioBufferConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioBuffer")));
+    Local<Function> audioBufferConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioBuffer")).ToLocalChecked());
     Local<Object> audioBufferObj = audioContext->CreateBuffer(audioBufferConstructor, numOfChannels, length, sampleRate);
 
     info.GetReturnValue().Set(audioBufferObj);
@@ -386,7 +386,7 @@ NAN_METHOD(AudioContext::CreateEmptyBuffer) {
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-  Local<Function> audioBufferConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioBuffer")));
+  Local<Function> audioBufferConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioBuffer")).ToLocalChecked());
   uint32_t sampleRate = (uint32_t)audioContext->audioContext->sampleRate();
   Local<Object> audioBufferObj = audioContext->CreateEmptyBuffer(audioBufferConstructor, sampleRate);
 
@@ -399,7 +399,7 @@ NAN_METHOD(AudioContext::CreateBufferSource) {
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-  Local<Function> audioBufferSourceNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioBufferSourceNode")));
+  Local<Function> audioBufferSourceNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioBufferSourceNode")).ToLocalChecked());
   Local<Object> audioBufferSourceNodeObj = audioContext->CreateBufferSource(audioBufferSourceNodeConstructor, audioContextObj);
 
   info.GetReturnValue().Set(audioBufferSourceNodeObj);
@@ -415,7 +415,7 @@ NAN_METHOD(AudioContext::CreateScriptProcessor) {
   Local<Object> audioContextObj = info.This();
   AudioContext *audioContext = ObjectWrap::Unwrap<AudioContext>(audioContextObj);
 
-  Local<Function> scriptProcessorNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("ScriptProcessorNode")));
+  Local<Function> scriptProcessorNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("ScriptProcessorNode")).ToLocalChecked());
   Local<Object> scriptProcessorNodeObj = audioContext->CreateScriptProcessor(scriptProcessorNodeConstructor, bufferSize, numberOfInputChannels, numberOfOutputChannels, audioContextObj);
 
   info.GetReturnValue().Set(scriptProcessorNodeObj);

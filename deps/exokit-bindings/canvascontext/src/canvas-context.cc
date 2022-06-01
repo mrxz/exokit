@@ -416,7 +416,7 @@ NAN_METHOD(CanvasRenderingContext2D::New) {
   Nan::SetAccessor(ctxObj, JS_STR("lineCap"), LineCapGetter, LineCapSetter);
   Nan::SetAccessor(ctxObj, JS_STR("lineJoin"), LineJoinGetter, LineJoinSetter);
 
-  // ctxObj->Set(JS_STR("font"), JS_STR("10px sans-serif"));
+  // ctxObj->Set(Nan::GetCurrentContext(), JS_STR("font"), JS_STR("10px sans-serif"));
 
   info.GetReturnValue().Set(ctxObj);
 }

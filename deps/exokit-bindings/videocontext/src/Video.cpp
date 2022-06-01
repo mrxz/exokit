@@ -501,8 +501,8 @@ NAN_METHOD(Video::GetDevices) {
     const DeviceString& name(device.second);
     Local<Object> obj = Object::New(Isolate::GetCurrent());
     lst->Set(i++, obj);
-    obj->Set(JS_STR("id"), JS_STR(id.c_str()));
-    obj->Set(JS_STR("name"), JS_STR(name.c_str()));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("id"), JS_STR(id.c_str()));
+    obj->Set(Nan::GetCurrentContext(), JS_STR("name"), JS_STR(name.c_str()));
 
     VideoModeList modes;
     VideoMode::getDeviceModes(modes, id);
@@ -512,11 +512,11 @@ NAN_METHOD(Video::GetDevices) {
     for (auto mode : modes) {
       Local<Object> obj = Object::New(Isolate::GetCurrent());
       lst->Set(j++, obj);
-      obj->Set(JS_STR("width"), JS_NUM(mode.width));
-      obj->Set(JS_STR("height"), JS_NUM(mode.height));
-      obj->Set(JS_STR("fps"), JS_NUM(mode.FPS));
+      obj->Set(Nan::GetCurrentContext(), JS_STR("width"), JS_NUM(mode.width));
+      obj->Set(Nan::GetCurrentContext(), JS_STR("height"), JS_NUM(mode.height));
+      obj->Set(Nan::GetCurrentContext(), JS_STR("fps"), JS_NUM(mode.FPS));
     }
-    obj->Set(JS_STR("modes"), lst);
+    obj->Set(Nan::GetCurrentContext(), JS_STR("modes"), lst);
   }
   info.GetReturnValue().Set(lst);
 }
@@ -581,7 +581,7 @@ Local<Object> VideoDevice::Initialize(Isolate *isolate, Local<Value> imageDataCo
   Nan::SetAccessor(proto, JS_STR("imageData"), ImageDataGetter);
 
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
-  ctorFn->Set(JS_STR("ImageData"), imageDataCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("ImageData"), imageDataCons);
 
   return scope.Escape(ctorFn);
 }
@@ -671,7 +671,7 @@ NAN_GETTER(VideoDevice::DataGetter) {
       double h = video->dev->getHeight();
 
       Local<Function> imageDataCons = Local<Function>::Cast(
-        JS_OBJ(Local<Object>::Cast(info.This())->Get(JS_STR("constructor")))->Get(JS_STR("ImageData"))
+        JS_OBJ(Local<Object>::Cast(info.This())->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("ImageData")).ToLocalChecked()
       );
       Local<Value> argv[] = {
         Number::New(Isolate::GetCurrent(), w),
@@ -680,7 +680,7 @@ NAN_GETTER(VideoDevice::DataGetter) {
       video->imageData.Reset(imageDataCons->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv)/sizeof(argv[0]), argv).ToLocalChecked());
     }
 
-    auto data = Nan::New(video->imageData)->Get(JS_STR("data"));
+    auto data = Nan::New(video->imageData)->Get(Nan::GetCurrentContext(), JS_STR("data")).ToLocalChecked();
     if (data->IsUint8ClampedArray()) {
       auto uint8ClampedArray = Uint8ClampedArray::Cast(*data);
       uint8_t *buffer = (uint8_t *)uint8ClampedArray->Buffer()->GetContents().Data() + uint8ClampedArray->ByteOffset();
@@ -689,7 +689,7 @@ NAN_GETTER(VideoDevice::DataGetter) {
   }
 
   if (!video->imageData.IsEmpty()) {
-    info.GetReturnValue().Set(Nan::New(video->imageData)->Get(JS_STR("data")));
+    info.GetReturnValue().Set(Nan::New(video->imageData)->Get(Nan::GetCurrentContext(), JS_STR("data")).ToLocalChecked());
   } else {
     info.GetReturnValue().Set(Nan::Null());
   }

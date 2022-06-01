@@ -131,7 +131,7 @@ NAN_METHOD(FakeAudioParam::SetValueCurveAtTime) {
     FakeAudioParam *fakeAudioParam = ObjectWrap::Unwrap<FakeAudioParam>(info.This());
 
     Local<Float32Array> curveValue = Local<Float32Array>::Cast(info[0]);
-    float newValue = curveValue->Length() == 0 ? 0 : TO_FLOAT(curveValue->Get(curveValue->Length() - 1));
+    float newValue = curveValue->Length() == 0 ? 0 : TO_FLOAT(curveValue->Get(Nan::GetCurrentContext(), curveValue->Length() - 1).ToLocalChecked());
     fakeAudioParam->setter(newValue);
   } else {
     Nan::ThrowError("setValueCurveAtTime: invalid arguments");

@@ -1177,38 +1177,38 @@ NAN_METHOD(ComposeLayers) {
         Local<Object> elementObj = Local<Object>::Cast(element);
 
         LayerType layerType = LayerType::NONE;
-        if (JS_OBJ(elementObj->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLIFrameElement"))) {
+        if (JS_OBJ(elementObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLIFrameElement"))) {
           /* if (
-            elementObj->Get(JS_STR("contentWindow"))->IsObject() &&
-            elementObj->Get(JS_STR("contentDocument"))->IsObject() &&
-            JS_OBJ(elementObj->Get(JS_STR("contentDocument")))->Get(JS_STR("framebuffer"))->IsObject()
+            elementObj->Get(Nan::GetCurrentContext(), JS_STR("contentWindow")).ToLocalChecked()->IsObject() &&
+            elementObj->Get(Nan::GetCurrentContext(), JS_STR("contentDocument")).ToLocalChecked()->IsObject() &&
+            JS_OBJ(elementObj->Get(Nan::GetCurrentContext(), JS_STR("contentDocument")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("framebuffer")).ToLocalChecked()->IsObject()
           ) {
             // layerType = LayerType::IFRAME_3D;
-            Local<Object> contentWindowObj = JS_OBJ(elementObj->Get(JS_STR("contentWindow")));
-            if (TO_UINT32(contentWindowObj->Get(JS_STR("phase"))) == 2) { // PHASES.RENDERED
+            Local<Object> contentWindowObj = JS_OBJ(elementObj->Get(Nan::GetCurrentContext(), JS_STR("contentWindow")).ToLocalChecked());
+            if (TO_UINT32(contentWindowObj->Get(Nan::GetCurrentContext(), JS_STR("phase")).ToLocalChecked()) == 2) { // PHASES.RENDERED
               layerType = LayerType::IFRAME_3D;
             } else {
               layerType = LayerType::IFRAME_3D_REPROJECT;
             }
-          } else */if (TO_UINT32(elementObj->Get(JS_STR("d"))) == 2 && elementObj->Get(JS_STR("browser"))->IsObject()) {
+          } else */if (TO_UINT32(elementObj->Get(Nan::GetCurrentContext(), JS_STR("d")).ToLocalChecked()) == 2 && elementObj->Get(Nan::GetCurrentContext(), JS_STR("browser")).ToLocalChecked()->IsObject()) {
             layerType = LayerType::IFRAME_2D;
           }
-        } /* else if (JS_OBJ(elementObj->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("HTMLCanvasElement"))) {
-          if (elementObj->Get(JS_STR("framebuffer"))->IsObject()) {
+        } /* else if (JS_OBJ(elementObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("HTMLCanvasElement"))) {
+          if (elementObj->Get(Nan::GetCurrentContext(), JS_STR("framebuffer")).ToLocalChecked()->IsObject()) {
             layerType = LayerType::RAW_CANVAS;
           }
         } */
 
         switch (layerType) {
           /* case LayerType::IFRAME_3D: {
-            Local<Object> windowObj = Local<Object>::Cast(elementObj->Get(JS_STR("contentWindow")));
-            int width = TO_INT32(windowObj->Get(JS_STR("width")));
-            int height = TO_INT32(windowObj->Get(JS_STR("height")));
-            Local<Object> framebufferObj = Local<Object>::Cast(JS_OBJ(elementObj->Get(JS_STR("contentDocument")))->Get(JS_STR("framebuffer")));
-            GLuint msTex = TO_UINT32(framebufferObj->Get(JS_STR("msTex")));
-            GLuint msDepthTex = TO_UINT32(framebufferObj->Get(JS_STR("msDepthTex")));
-            GLuint tex = TO_UINT32(framebufferObj->Get(JS_STR("tex")));
-            GLuint depthTex = TO_UINT32(framebufferObj->Get(JS_STR("depthTex")));
+            Local<Object> windowObj = Local<Object>::Cast(elementObj->Get(Nan::GetCurrentContext(), JS_STR("contentWindow")).ToLocalChecked());
+            int width = TO_INT32(windowObj->Get(Nan::GetCurrentContext(), JS_STR("width")).ToLocalChecked());
+            int height = TO_INT32(windowObj->Get(Nan::GetCurrentContext(), JS_STR("height")).ToLocalChecked());
+            Local<Object> framebufferObj = Local<Object>::Cast(JS_OBJ(elementObj->Get(Nan::GetCurrentContext(), JS_STR("contentDocument")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("framebuffer")).ToLocalChecked());
+            GLuint msTex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("msTex")).ToLocalChecked());
+            GLuint msDepthTex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("msDepthTex")).ToLocalChecked());
+            GLuint tex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("tex")).ToLocalChecked());
+            GLuint depthTex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("depthTex")).ToLocalChecked());
 
             layers.push_back(LayerSpec{
               LayerType::IFRAME_3D,
@@ -1225,12 +1225,12 @@ NAN_METHOD(ComposeLayers) {
             break;
           }
           case LayerType::IFRAME_3D_REPROJECT: {
-            Local<Object> windowObj = Local<Object>::Cast(elementObj->Get(JS_STR("contentWindow")));
-            int width = TO_INT32(windowObj->Get(JS_STR("width")));
-            int height = TO_INT32(windowObj->Get(JS_STR("height")));
-            Local<Object> framebufferObj = Local<Object>::Cast(JS_OBJ(elementObj->Get(JS_STR("contentDocument")))->Get(JS_STR("framebuffer")));
-            GLuint tex = TO_UINT32(framebufferObj->Get(JS_STR("tex")));
-            GLuint depthTex = TO_UINT32(framebufferObj->Get(JS_STR("depthTex")));
+            Local<Object> windowObj = Local<Object>::Cast(elementObj->Get(Nan::GetCurrentContext(), JS_STR("contentWindow")).ToLocalChecked());
+            int width = TO_INT32(windowObj->Get(Nan::GetCurrentContext(), JS_STR("width")).ToLocalChecked());
+            int height = TO_INT32(windowObj->Get(Nan::GetCurrentContext(), JS_STR("height")).ToLocalChecked());
+            Local<Object> framebufferObj = Local<Object>::Cast(JS_OBJ(elementObj->Get(Nan::GetCurrentContext(), JS_STR("contentDocument")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("framebuffer")).ToLocalChecked());
+            GLuint tex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("tex")).ToLocalChecked());
+            GLuint depthTex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("depthTex")).ToLocalChecked());
 
             layers.push_back(LayerSpec{
               LayerType::IFRAME_3D_REPROJECT,
@@ -1247,14 +1247,14 @@ NAN_METHOD(ComposeLayers) {
             break;
           } */
           case LayerType::IFRAME_2D: {
-            Local<Object> browserObj = Local<Object>::Cast(elementObj->Get(JS_STR("browser")));
-            int width = TO_INT32(browserObj->Get(JS_STR("width")));
-            int height = TO_INT32(browserObj->Get(JS_STR("height")));
-            GLuint tex = TO_UINT32(Local<Object>::Cast(browserObj->Get(JS_STR("texture")))->Get(JS_STR("id")));
+            Local<Object> browserObj = Local<Object>::Cast(elementObj->Get(Nan::GetCurrentContext(), JS_STR("browser")).ToLocalChecked());
+            int width = TO_INT32(browserObj->Get(Nan::GetCurrentContext(), JS_STR("width")).ToLocalChecked());
+            int height = TO_INT32(browserObj->Get(Nan::GetCurrentContext(), JS_STR("height")).ToLocalChecked());
+            GLuint tex = TO_UINT32(Local<Object>::Cast(browserObj->Get(Nan::GetCurrentContext(), JS_STR("texture")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("id")).ToLocalChecked());
 
-            Local<Float32Array> renderWidthFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(JS_STR("renderWidth")));
+            Local<Float32Array> renderWidthFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(Nan::GetCurrentContext(), JS_STR("renderWidth")).ToLocalChecked());
             const float renderWidth = TO_FLOAT(renderWidthFloat32Array->Get(0));
-            Local<Float32Array> renderHeightFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(JS_STR("renderHeight")));
+            Local<Float32Array> renderHeightFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(Nan::GetCurrentContext(), JS_STR("renderHeight")).ToLocalChecked());
             const float renderHeight = TO_FLOAT(renderHeightFloat32Array->Get(0));
             std::vector<float> leftViewport = {
               0,
@@ -1269,18 +1269,18 @@ NAN_METHOD(ComposeLayers) {
               renderHeight,
             };
 
-            Local<Float32Array> leftViewMatrixFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(JS_STR("leftViewMatrix")));
+            Local<Float32Array> leftViewMatrixFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(Nan::GetCurrentContext(), JS_STR("leftViewMatrix")).ToLocalChecked());
             std::vector<float> leftViewMatrix(16);
             memcpy(leftViewMatrix.data(), (float *)((char *)leftViewMatrixFloat32Array->Buffer()->GetContents().Data() + leftViewMatrixFloat32Array->ByteOffset()), leftViewMatrix.size() * sizeof(leftViewMatrix[0]));
 
-            Local<Float32Array> rightViewMatrixFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(JS_STR("rightViewMatrix")));
+            Local<Float32Array> rightViewMatrixFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(Nan::GetCurrentContext(), JS_STR("rightViewMatrix")).ToLocalChecked());
             std::vector<float> rightViewMatrix(16);
             memcpy(rightViewMatrix.data(), (float *)((char *)rightViewMatrixFloat32Array->Buffer()->GetContents().Data() + rightViewMatrixFloat32Array->ByteOffset()), rightViewMatrix.size() * sizeof(rightViewMatrix[0]));
 
-            Local<Value> xrOffsetValue = elementObj->Get(JS_STR("xrOffset"));
+            Local<Value> xrOffsetValue = elementObj->Get(Nan::GetCurrentContext(), JS_STR("xrOffset")).ToLocalChecked();
             if (TO_BOOL(xrOffsetValue)) {
               Local<Object> xrOffsetObj = Local<Object>::Cast(xrOffsetValue);
-              Local<Float32Array> xrOffsetMatrixFloat32Array = Local<Float32Array>::Cast(xrOffsetObj->Get(JS_STR("matrix")));
+              Local<Float32Array> xrOffsetMatrixFloat32Array = Local<Float32Array>::Cast(xrOffsetObj->Get(Nan::GetCurrentContext(), JS_STR("matrix")).ToLocalChecked());
 
               std::vector<float> xrOffsetMatrix(16);
               memcpy(xrOffsetMatrix.data(), (float *)((char *)xrOffsetMatrixFloat32Array->Buffer()->GetContents().Data() + xrOffsetMatrixFloat32Array->ByteOffset()), xrOffsetMatrix.size() * sizeof(xrOffsetMatrix[0]));
@@ -1289,10 +1289,10 @@ NAN_METHOD(ComposeLayers) {
               rightViewMatrix = multiplyMatrices(rightViewMatrix, xrOffsetMatrix);
             }
 
-            Local<Float32Array> leftProjectionMatrixFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(JS_STR("leftProjectionMatrix")));
+            Local<Float32Array> leftProjectionMatrixFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(Nan::GetCurrentContext(), JS_STR("leftProjectionMatrix")).ToLocalChecked());
             std::vector<float> leftProjectionMatrix(16);
             memcpy(leftProjectionMatrix.data(), (char *)leftProjectionMatrixFloat32Array->Buffer()->GetContents().Data() + leftProjectionMatrixFloat32Array->ByteOffset(), 16 * sizeof(float));
-            Local<Float32Array> rightProjectionMatrixFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(JS_STR("rightProjectionMatrix")));
+            Local<Float32Array> rightProjectionMatrixFloat32Array = Local<Float32Array>::Cast(xrStateObj->Get(Nan::GetCurrentContext(), JS_STR("rightProjectionMatrix")).ToLocalChecked());
             std::vector<float> rightProjectionMatrix(16);
             memcpy(rightProjectionMatrix.data(), (char *)rightProjectionMatrixFloat32Array->Buffer()->GetContents().Data() + rightProjectionMatrixFloat32Array->ByteOffset(), 16 * sizeof(float));
 
@@ -1320,13 +1320,13 @@ NAN_METHOD(ComposeLayers) {
             break;
           }
           /* case LayerType::RAW_CANVAS: {
-            Local<Object> framebufferObj = Local<Object>::Cast(elementObj->Get(JS_STR("framebuffer")));
-            GLuint tex = TO_UINT32(framebufferObj->Get(JS_STR("tex")));
-            GLuint depthTex = TO_UINT32(framebufferObj->Get(JS_STR("depthTex")));
-            GLuint msTex = TO_UINT32(framebufferObj->Get(JS_STR("msTex")));
-            GLuint msDepthTex = TO_UINT32(framebufferObj->Get(JS_STR("msDepthTex")));
-            int width = TO_INT32(framebufferObj->Get(JS_STR("width")));
-            int height = TO_INT32(framebufferObj->Get(JS_STR("height")));
+            Local<Object> framebufferObj = Local<Object>::Cast(elementObj->Get(Nan::GetCurrentContext(), JS_STR("framebuffer")).ToLocalChecked());
+            GLuint tex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("tex")).ToLocalChecked());
+            GLuint depthTex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("depthTex")).ToLocalChecked());
+            GLuint msTex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("msTex")).ToLocalChecked());
+            GLuint msDepthTex = TO_UINT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("msDepthTex")).ToLocalChecked());
+            int width = TO_INT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("width")).ToLocalChecked());
+            int height = TO_INT32(framebufferObj->Get(Nan::GetCurrentContext(), JS_STR("height")).ToLocalChecked());
 
             layers.push_back(LayerSpec{
               LayerType::RAW_CANVAS,

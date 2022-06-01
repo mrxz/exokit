@@ -21,7 +21,7 @@ Local<Object> StereoPannerNode::Initialize(Isolate *isolate, Local<Value> audioP
 
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
 
-  ctorFn->Set(JS_STR("AudioParam"), audioParamCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("AudioParam"), audioParamCons);
 
   return scope.Escape(ctorFn);
 }
@@ -33,7 +33,7 @@ void StereoPannerNode::InitializePrototype(Local<ObjectTemplate> proto) {
 NAN_METHOD(StereoPannerNode::New) {
   // Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))) {
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))) {
     Local<Object> audioContextObj = Local<Object>::Cast(info[0]);
 
     StereoPannerNode *stereoPannerNode = new StereoPannerNode();
@@ -46,14 +46,14 @@ NAN_METHOD(StereoPannerNode::New) {
     stereoPannerNode->context.Reset(audioContextObj);
     stereoPannerNode->audioNode = labStereoPannerNode;
 
-    Local<Function> audioParamConstructor = Local<Function>::Cast(JS_OBJ(stereoPannerNodeObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioParam")));
+    Local<Function> audioParamConstructor = Local<Function>::Cast(JS_OBJ(stereoPannerNodeObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioParam")).ToLocalChecked());
     Local<Value> args[] = {
       audioContextObj,
     };
     Local<Object> panAudioParamObj = audioParamConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(args)/sizeof(args[0]), args).ToLocalChecked();
     AudioParam *panAudioParam = ObjectWrap::Unwrap<AudioParam>(panAudioParamObj);
     panAudioParam->audioParam = (*(shared_ptr<lab::StereoPannerNode> *)(&stereoPannerNode->audioNode))->pan();
-    stereoPannerNodeObj->Set(JS_STR("pan"), panAudioParamObj);
+    stereoPannerNodeObj->Set(Nan::GetCurrentContext(), JS_STR("pan"), panAudioParamObj);
 
     info.GetReturnValue().Set(stereoPannerNodeObj);
   } else {

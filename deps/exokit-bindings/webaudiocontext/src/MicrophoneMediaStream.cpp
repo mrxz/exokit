@@ -21,7 +21,7 @@ Local<Object> MicrophoneMediaStream::Initialize(Isolate *isolate, Local<Value> m
   MicrophoneMediaStream::InitializePrototype(proto);
 
   Local<Function> ctorFn = Nan::GetFunction(ctor).ToLocalChecked();
-  ctorFn->Set(JS_STR("MediaStreamTrack"), mediaStreamTrackCons);
+  ctorFn->Set(Nan::GetCurrentContext(), JS_STR("MediaStreamTrack"), mediaStreamTrackCons);
 
   return scope.Escape(ctorFn);
 }
@@ -37,13 +37,13 @@ NAN_METHOD(MicrophoneMediaStream::New) {
   Local<Object> microphoneMediaStreamObj = info.This();
   microphoneMediaStream->Wrap(microphoneMediaStreamObj);
 
-  Local<Function> mediaStreamTrackConstructor = Local<Function>::Cast(JS_OBJ(microphoneMediaStreamObj->Get(JS_STR("constructor")))->Get(JS_STR("MediaStreamTrack")));
+  Local<Function> mediaStreamTrackConstructor = Local<Function>::Cast(JS_OBJ(microphoneMediaStreamObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("MediaStreamTrack")).ToLocalChecked());
   Local<Value> argv[] = {
     microphoneMediaStreamObj,
   };
   Local<Object> mediaStreamTrackObj = mediaStreamTrackConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv)/sizeof(argv[0]), argv).ToLocalChecked();
   Local<Array> localTracks = Nan::New(microphoneMediaStream->tracks);
-  localTracks->Set(0, mediaStreamTrackObj);
+  localTracks->Set(Nan::GetCurrentContext(), 0, mediaStreamTrackObj);
 
   /* {
     lab::ContextRenderLock r(getDefaultAudioContext(), "MicrophoneMediaStream::New");

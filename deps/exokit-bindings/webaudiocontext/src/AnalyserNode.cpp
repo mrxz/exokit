@@ -40,7 +40,8 @@ void AnalyserNode::InitializePrototype(Local<ObjectTemplate> proto) {
 NAN_METHOD(AnalyserNode::New) {
   Nan::HandleScope scope;
 
-  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(JS_STR("constructor")))->Get(JS_STR("name"))->StrictEquals(JS_STR("AudioContext"))) {
+  Local<Context> context = Nan::GetCurrentContext();
+  if (info[0]->IsObject() && JS_OBJ(JS_OBJ(info[0])->Get(context, JS_STR("constructor")).ToLocalChecked())->Get(context, JS_STR("name")).ToLocalChecked()->StrictEquals(JS_STR("AudioContext"))) {
     Local<Object> audioContextObj = Local<Object>::Cast(info[0]);
 
     AnalyserNode *analyserNode = new AnalyserNode();

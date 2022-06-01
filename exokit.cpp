@@ -116,7 +116,7 @@ void InitExports(Local<Object> exports, Local<Context> context) {
   Local<Array> initFunctionAddressArray = Nan::New<Array>(2);
   initFunctionAddressArray->Set(0, Nan::New<Integer>((uint32_t)(initFunctionAddress >> 32)));
   initFunctionAddressArray->Set(1, Nan::New<Integer>((uint32_t)(initFunctionAddress & 0xFFFFFFFF)));
-  exports->Set(JS_STR("initFunctionAddress"), initFunctionAddressArray); */
+  exports->Set(Nan::GetCurrentContext(), JS_STR("initFunctionAddress"), initFunctionAddressArray); */
 }
 
 void Init(Local<Object> exports, Local<Context> context) {

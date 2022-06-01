@@ -114,19 +114,19 @@ NAN_METHOD(OculusMobileContext::New) {
   OculusMobileContext *oculusMobileContext = new OculusMobileContext(windowHandle);
   oculusMobileContext->Wrap(oculusMobileContextObj);
 
-  /* Local<Function> audioDestinationNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioDestinationNode")));
+  /* Local<Function> audioDestinationNodeConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioDestinationNode")).ToLocalChecked());
   Local<Value> argv1[] = {
     audioContextObj,
   };
   Local<Object> audioDestinationNodeObj = audioDestinationNodeConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv1)/sizeof(argv1[0]), argv1).ToLocalChecked();
-  audioContextObj->Set(JS_STR("destination"), audioDestinationNodeObj);
+  audioContextObj->Set(Nan::GetCurrentContext(), JS_STR("destination"), audioDestinationNodeObj);
 
-  Local<Function> audioListenerConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(JS_STR("constructor")))->Get(JS_STR("AudioListener")));
+  Local<Function> audioListenerConstructor = Local<Function>::Cast(JS_OBJ(audioContextObj->Get(Nan::GetCurrentContext(), JS_STR("constructor")).ToLocalChecked())->Get(Nan::GetCurrentContext(), JS_STR("AudioListener")).ToLocalChecked());
   Local<Value> argv2[] = {
     audioContextObj,
   };
   Local<Object> audioListenerObj = audioListenerConstructor->NewInstance(Isolate::GetCurrent()->GetCurrentContext(), sizeof(argv2)/sizeof(argv2[0]), argv2).ToLocalChecked();
-  audioContextObj->Set(JS_STR("listener"), audioListenerObj); */
+  audioContextObj->Set(Nan::GetCurrentContext(), JS_STR("listener"), audioListenerObj); */
 
   info.GetReturnValue().Set(oculusMobileContextObj);
 }
