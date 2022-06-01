@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-if (require.main === module && !/^1[12]\./.test(process.versions.node)) {
-  throw new Error('node 11 or 12 required');
+if (require.main === module && !/^1[68]\./.test(process.versions.node)) {
+  throw new Error('node 16 or 18 required');
 }
 // const cwd = process.cwd();
 // process.chdir(__dirname); // needed for global bin to find libraries
